@@ -1,1 +1,5 @@
-
+Came across a Windows Sysinternal tool that helps in debugging and have a peek inside the Kernel and it's structure.
+'''
+https://learn.microsoft.com/en-us/sysinternals/downloads/livekd
+'''
+LiveKd can be used as a CLI or can be attached with the WinDbg tool
