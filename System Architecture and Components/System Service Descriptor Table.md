@@ -13,7 +13,18 @@ typedef struct tagSERVICE_DESCRIPTOR_TABLE {
     SYSTEM_SERVICE_TABLE sst4;
 } SERVICE_DESCRIPTOR_TABLE;
 ```
-Well even I didn't understood the definition properly so finding other resources gives a bit more clarity. Here I will explain you with and example
+Well even I didn't understood the definition properly so finding other resources gives a bit more clarity. Here I will explain you with an example. 
+
+Refer the diagram below.
+
+<p align="center">
+  <img width="311" height="412" src="https://user-images.githubusercontent.com/59355783/199735744-83db37ee-af78-4c5d-bf8e-56499f27743a.png">
+</p>
+
+Suppose there is a process running called "Notepad.exe" that wants to write data to the disk. For this to happen it will call an API called **[CreateFileA](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea)** from the Kernel32.dll file which is a type of DLL that exposes majority of the Win32 APIs to the applications. Now we will try to understand how notepad calls Win32 API and where does SSDT stands.
+
+Let's try to dive-in and understand better.
+
 
 Typing👨‍💻 .....
 
