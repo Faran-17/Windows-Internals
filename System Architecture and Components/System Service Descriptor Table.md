@@ -18,7 +18,7 @@ Well even I didn't understood the definition properly so finding other resources
 Refer the diagram below.
 
 <p align="center">
-  <img width="311" height="412" src="https://user-images.githubusercontent.com/59355783/199743250-7d703876-81c4-4feb-975d-098ca04f43ad.png">
+  <img src="https://user-images.githubusercontent.com/59355783/199767936-d360e825-7cd9-43db-9963-1bde75895578.png">
 </p>
 
 Suppose there is a process running called "Notepad.exe" that wants to write data to the disk. For this to happen it will call an API called **[CreateFileA](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea)** from the Kernel32.dll file which is a type of DLL that exposes majority of the Win32 APIs to the applications. Now we will try to understand how notepad calls Win32 API and where does SSDT stands.
