@@ -2,7 +2,7 @@
 
 Here are my notes as I learn and document about Windows Internals and Win32 APIs. Feel free to refer the notes and contact me if you have any suggestions😀!
 
-**Note - I will not be covering 100% of the topics from the books mentioned**
+**Note - I will not be covering 100% of the topics from the books mentioned also use Github's light theme for clear visible images**
 
 Windows Internal Book
 ---
