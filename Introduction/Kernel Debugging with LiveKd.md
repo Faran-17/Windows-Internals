@@ -34,7 +34,7 @@ This will open up LiveKd in WinDbg.
 
 ## Process
 
-The **```!process```** command will display a specified proccess along with it's details
+The **```!process```** command will display a specified process along with it's details
 ![image](https://user-images.githubusercontent.com/59355783/197511212-f4d55fa3-1134-4333-b8eb-df0e0ce01702.png)
 
 The above image displays the **windb.exe** process and it's details as highlighted.
