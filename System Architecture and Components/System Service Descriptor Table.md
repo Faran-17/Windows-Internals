@@ -33,6 +33,33 @@ We will continue our previous example, notepad.exe wants to write to the disk so
 
 The code of **NtCreateFile** is responsible to make system call i.e **Syscall** or **Sysenter**, after that the **Ntoskrnl.exe** that resides in the kernel space will call the kernel version of the **NtCreateFile** which in fact is same i.e **NtCreateFile** which does the actual work. **Now the SSDT table is used to find out absolute address of the kernel mode version of the NtCreateFile**. Now that we have idea of where does the SSDT table lies in the picture. We can move to how SSDT works and try to understand it more better. Before we move forward, keep the above diagram in mind to get the bigger picture.
 
+### 32-Bit vs 64-Bit
+Now we will take a look at how SSDT table works on 32-bit and 64-bit operating systems. First let's take a look at 32-bit system
+
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/59355783/200585784-6d01829f-e814-4fe3-9f1d-09219fd7db01.png">
+</p>
+
+Here is the digram of SSDT on 32-bit operating system. Recall the syscall from the previous diagram, syscalls and SSDT (KiServiceTable) work togeher as a bridge between userland API calls and their corresponding kernel routines, allowing the kernel to know which routine should be executed for a given syscall that originated in the user space.
+
+The syscall is the index for the kiservicetable table that has an array of pointers to the actual addresses in the kernel routine. For this demonstration, we are only referring to the syscall number, not the actual function. We will take a detail look with an example later on.
+
+Now let's take a look at 64-bit system.
+
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/59355783/200587366-892e0994-2a2d-4cd1-8c53-e825aa6c0b9b.png">
+</p>
+
+Here is diagram of SSDT on 64-bit operating system from the iredteam. SSDT works a little different on 64-bit. SSDT contains relative offsets to kernel routines. In order to get the absolute address for a given offset, the following formula needs to be applied.
+```
+RoutineAbsoluteAddress = KiServiceTableAddress + (routineOffset >>> 4)
+```
+In the above formula we can find the absolute address with the sum of KiServiceTable addres and the routine offset of the syscall and perform unsigned right shift. Let's look at how SSDT table looks like with different tools. First is the SSDT view tool
+
+<p alighn="center">
+    <img src="https://user-images.githubusercontent.com/59355783/200593422-fa5227a8-89f0-4080-9d37-6fd53728fc22.png">
+</p>
+
 
 
 Typing👨‍💻 .....
