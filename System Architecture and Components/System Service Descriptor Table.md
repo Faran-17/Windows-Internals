@@ -60,7 +60,7 @@ In the above formula we can find the absolute address with the sum of KiServiceT
     <img src="https://user-images.githubusercontent.com/59355783/200593422-fa5227a8-89f0-4080-9d37-6fd53728fc22.png">
 </p>
 
-
+The image above is self explanatory if you understood the previous diagrams. The best to get a detailed look on SSDT is to use WinDbg tool.
 
 Typing👨‍💻 .....
 
