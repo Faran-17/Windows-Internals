@@ -150,6 +150,9 @@ Hope this clears the concept.
 1. In 32-bit versions, malware developers develop malwares that run in Kernel mode i.e rootkit that modify entries in either the **nt!KiServiceTable** or the **win32k!W32pServiceTable** diverting System calls to their own code in order to cause troubles. Not only malwares but many security products like Anti-virus used to hook the SSDTs as well in order to receive an immediate alert on virus attacks.
 2. However, 64-bit versions introduced a strong protection feature called Kernel Patch Protection (generally known by the term PatchGuard). PatchGuard makes periodic checks to make sure that a certain number of critical System structures, including the SSDTs, were not modified in the meantime. Security software, namely antivirus, was forced to search for less efficient alternatives. Authors of Rootkits suffered a violent backlash but not a complete defeat - from time to time, they come up with new but short-lived ways to bypass the PatchGuard.
 
+### Closing thoughts
+Hope you all understand what happens when applications like notepad access Win32 APIs from the kernel and SSDT knows exactly the address of the following function and where to call it from. This logic happens in all applications where they interact with Win32 APIs.
+
 **Hope you liked it, stay tuned for more😃**
 
 # Resources
