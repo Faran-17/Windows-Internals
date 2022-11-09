@@ -124,8 +124,37 @@ We have the offset **01da3d07**, now we can get the absolute address using the f
 
 We get the absolute memory address of the **NtCreateFile** function. Here is how we can define it in the form of diagram.
 
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/59355783/200848321-9f220741-d8fe-44f9-84ce-bf2089b681da.png">
+</p>    
 
+We can also use a for-loop command to display Win32 API names along with their associated absolute address.
 
-Typing👨‍💻 .....
+```
+0: kd> .foreach /ps 1 /pS 1 ( offset {dd /c 1 nt!KiServiceTable L poi(nt!KeServiceDescriptorTable+10)}){ r $t0 = ( offset >>> 4) + nt!KiServiceTable; .printf "%p - %y\n", $t0, $t0 }
+fffff8066ddabde0 - fffff806`6ddabde0
+fffff8066ddb3390 - fffff806`6ddb3390
+fffff8065e3319c0 - nt!NtAcceptConnectPort (fffff806`5e3319c0)
+fffff8065e4f7980 - nt!NtMapUserPhysicalPagesScatter (fffff806`5e4f7980)
+fffff8065e2af2b0 - nt!NtWaitForSingleObject (fffff806`5e2af2b0)
+fffff8066de61e50 - fffff806`6de61e50
+fffff8065e34a550 - nt!NtReadFile (fffff806`5e34a550)
+fffff8065e2c05f0 - nt!NtDeviceIoControlFile (fffff806`5e2c05f0)
+fffff8065e252e40 - nt!NtWriteFile (fffff806`5e252e40)
+fffff8065e302ff0 - nt!NtRemoveIoCompletion (fffff806`5e302ff0)
+```
 
-(Be patient, the blog is currently underwork)
+Hope this clears the concept.
+
+# Why SSDT are important?
+1. In 32-bit versions, malware developers develop malwares that run in Kernel mode i.e rootkit that modify entries in either the **nt!KiServiceTable** or the **win32k!W32pServiceTable** diverting System calls to their own code in order to cause troubles. Not only malwares but many security products like Anti-virus used to hook the SSDTs as well in order to receive an immediate alert on virus attacks.
+2. However, 64-bit versions introduced a strong protection feature called Kernel Patch Protection (generally known by the term PatchGuard). PatchGuard makes periodic checks to make sure that a certain number of critical System structures, including the SSDTs, were not modified in the meantime. Security software, namely antivirus, was forced to search for less efficient alternatives. Authors of Rootkits suffered a violent backlash but not a complete defeat - from time to time, they come up with new but short-lived ways to bypass the PatchGuard.
+
+**Hope you liked it, stay tuned for more😃**
+
+# Resources
+1. https://www.ired.team/miscellaneous-reversing-forensics/windows-kernel-internals/glimpse-into-ssdt-in-windows-x64-kernel
+2. https://www.codeproject.com/Articles/1191465/The-Quest-for-the-SSDTs
+3. https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/debugger-download-tools
+4. https://www.novirusthanks.org/products/ssdt-view/
+
