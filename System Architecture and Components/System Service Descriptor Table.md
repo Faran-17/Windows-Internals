@@ -1,5 +1,5 @@
 # Summary
-In this post, we will try to take a look and understand what System Service Descriptor Table or SSDT is and understand it with WinDbg tool. Also we will take an example of how when and exe is booted and how Ntdll.dll and Win32 API file is called.
+In this post, we will take a look and understand what System Service Descriptor Table or SSDT is and understand it using [WinDbg](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/debugger-download-tools) tool. Also we will check what happens when an exe is booted and how Ntdll.dll and Win32 APIs are called.
 
 **Note -  System Service Descriptor Table is a vast topic and complex to understand but I will try explain to you and understand myself😅😅**
 
