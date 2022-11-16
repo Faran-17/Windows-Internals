@@ -97,7 +97,7 @@ If you can see the values matches, proving the point. To visualize it in a diagr
 
 # Example
 
-Now that we've got an idea of how SSDT works and function. We will try to break down an executable in this case notepad.exe to find absolute address of some Win32 API functions. If we refer the figures above you will get an idea of what is happening here. In WinDbg, open the notepad.exe application in the System32 folder.
+Now we've got an idea of how SSDT works and function. We will try to break down an executable in this case notepad.exe to find absolute address of some Win32 API functions. If we refer the figures above you will get an idea of what is happening here. In WinDbg, open the notepad.exe application in the System32 folder.
 
 <p align="center">
     <img src="https://user-images.githubusercontent.com/59355783/200825270-b5f3c857-e8f6-4921-a226-35f5c4502839.png">
