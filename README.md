@@ -4,8 +4,13 @@ Here are my notes as I learn and document about Windows Internals and Win32 APIs
 
 **Note - I will not be covering 100% of the topics from the books mentioned also better to use Github's light theme for clear visible images**
 
-Windows Internal Book
----
+# Index
+1. **[Introduction](https://github.com/Faran-17/Windows-Internals/tree/main/Introduction)**
+2. **[System Architecture and Components](https://github.com/Faran-17/Windows-Internals/tree/main/System%20Architecture%20and%20Components)**
+3. **[Processes and Jobs](https://github.com/Faran-17/Windows-Internals/tree/main/Processes%20and%20Jobs)**
+
+# Windows Internal Book
+
 ```
 https://learn.microsoft.com/en-us/sysinternals/resources/windows-internals
 ```
