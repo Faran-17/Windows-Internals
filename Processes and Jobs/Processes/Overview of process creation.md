@@ -8,7 +8,9 @@ In simple words a process is an instance of a program running in the computer. W
 
 # Process Creation Overview
 Now we will take a look at how a simple process is created and what APIs are called to properly call and create a process.
-![image](https://user-images.githubusercontent.com/59355783/210196058-6975f607-d0db-4fa6-8fd6-c8b4a60d8c6f.png)
+![image](https://user-images.githubusercontent.com/59355783/210236481-014dd790-ad94-4440-b852-a5979c2e7284.png)
+
+Note - After researching I've made some slight changes in the above diagram compared to the on in the Windows Internals Part 1 book(Page 114).
 
 If we take a look at the above diagram. When a user creates a process a simple it uses a simple Win API function called **[CreateProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessa)** which resides in the Kernel32.dll and creates a process in the same context and token as the user. Here is code structure of the API in C++ and C#.
 ```Cpp
@@ -82,6 +84,8 @@ NtCreateUserProcess (
 [DllImport("ntdll.dll", SetLastError=true)]
 static extern UInt32 NtCreateUserProcess(ref IntPtr ProcessHandle, ref IntPtr ThreadHandle, AccessMask ProcessDesiredAccess, AccessMask ThreadDesiredAccess, IntPtr ProcessObjectAttributes, IntPtr ThreadObjectAttributes, UInt32 ProcessFlags, UInt32 ThreadFlags, IntPtr ProcessParameters, ref PS_CREATE_INFO CreateInfo, ref PS_ATTRIBUTE_LIST AttributeList);
 ```
-After this transition will happen to kernel mode which will call the NtCreateUserProcess in the ntoskernel which is undocumented.
+After this transition will happen to kernel mode which will call the **NtCreateUserProcess** in the ntoskernel which is undocumented.
+
+There are also many other Win APIs that resides inside other DLLs. One of them being the **Advapi.dll** file. Advapi is also known as Advanced Windows 32 Base API which is located in the ***%SYSTEM%*** sub-folder, like ***C:\Windows\System32*** folder. Advapi32.dll is a part of the advanced API services library. It provides access to advanced functionality that comes in addition to the kernel. It is responsible for things like the Windows registry, restarting and shutting down the system, starting/stopping and creating Windows services, and managing user accounts.
 
 (Writing is in progress ....)
