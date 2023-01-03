@@ -44,7 +44,7 @@ static extern bool CreateProcess(
    out PROCESS_INFORMATION lpProcessInformation);
 ```
 
-The CreateProcess is used and abused by many malwares that utilizes techniques like creating or modifying system process(**[T1543](https://attack.mitre.org/techniques/T1543/)**) and process injection techniques(**[T1055](https://attack.mitre.org/techniques/T1055/)**) and many more.
+The CreateProcess is used and abused by malwares that utilizes techniques like creating or modifying system process(**[T1543](https://attack.mitre.org/techniques/T1543/)**) and process injection techniques(**[T1055](https://attack.mitre.org/techniques/T1055/)**) and many more.
 
 Using this API, the created process runs in the context (meaning the same access token) of the calling process. Execution then continues with a call to undocumentated **CreateProcessInternal()**, which is responsible for actually creating the user-mode process. Below is the structure of this API I found in the ReactOS source code(**[Refer the line 4625](https://doxygen.reactos.org/d9/dd7/dll_2win32_2kernel32_2client_2proc_8c_source.html)**).
 ```C++
@@ -87,5 +87,42 @@ static extern UInt32 NtCreateUserProcess(ref IntPtr ProcessHandle, ref IntPtr Th
 After this transition will happen to kernel mode which will call the **NtCreateUserProcess** in the ntoskernel which is undocumented.
 
 There are also many other Win APIs that resides inside other DLLs. One of them being the **Advapi.dll** file. Advapi is also known as Advanced Windows 32 Base API which is located in the ***%SYSTEM%*** sub-folder, like ***C:\Windows\System32*** folder. Advapi32.dll is a part of the advanced API services library. It provides access to advanced functionality that comes in addition to the kernel. It is responsible for things like the Windows registry, restarting and shutting down the system, starting/stopping and creating Windows services, and managing user accounts.
+
+Let's take a look at some of the APIs that are called by Advapi.
+
+First one is the **CreateProcessWithLogon** that starts a new process, opens an application in that process, and uses a passed UserID and Password. The application opened is running under the credentials and authority of the UserID passed. This API is also used by Runas command. C++ structure.
+```C++
+BOOL CreateProcessWithLogonW(
+  LPCWSTR lpUsername,
+  LPCWSTR lpDomain,
+  LPCWSTR lpPassword,
+  DWORD dwLogonFlags,
+  LPCWSTR lpApplicationName,
+  LPWSTR lpCommandLine,
+  DWORD dwCreationFlags,
+  LPVOID lpEnvironment,
+  LPCWSTR lpCurrentDirectory,
+  LPSTARTUPINFOW lpStartupInfo,
+  LPPROCESS_INFORMATION lpProcessInfo
+);
+```
+C# Structure.
+```C#
+[DllImport("advapi32.dll", SetLastError=true, CharSet=CharSet.Unicode)]
+  public static extern bool CreateProcessWithLogonW(
+     String             userName,
+     String             domain,
+     String             password,
+     LogonFlags         logonFlags,
+     String             applicationName,
+     String             commandLine,
+     CreationFlags          creationFlags,
+     UInt32             environment,
+     String             currentDirectory,
+     ref  StartupInfo       startupInfo,
+     out ProcessInformation     processInformation);
+```
+The CreateProcessWithLogon is abused by malwares that used techniques like Access Token Manipulation(**[T1134](https://attack.mitre.org/techniques/T1134/)**) read more about it **[here](https://www.elastic.co/blog/how-attackers-abuse-access-token-manipulation)**
+
 
 (Writing is in progress ....)
