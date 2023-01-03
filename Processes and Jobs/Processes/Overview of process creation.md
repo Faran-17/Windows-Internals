@@ -122,7 +122,7 @@ C# Structure.
      ref  StartupInfo       startupInfo,
      out ProcessInformation     processInformation);
 ```
-The CreateProcessWithLogon is abused by malwares that used techniques like Access Token Manipulation(**[T1134](https://attack.mitre.org/techniques/T1134/)**) read more about it **[here](https://www.elastic.co/blog/how-attackers-abuse-access-token-manipulation)**
+The CreateProcessWithLogon is abused by malwares that used techniques like Access Token Manipulation(**[T1134](https://attack.mitre.org/techniques/T1134/)**) read more about it **[here](https://www.elastic.co/blog/how-attackers-abuse-access-token-manipulation)**. 
 
 
 (Writing is in progress ....)
