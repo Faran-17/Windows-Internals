@@ -124,5 +124,76 @@ C# Structure.
 ```
 The CreateProcessWithLogon is abused by malwares that used techniques like Access Token Manipulation(**[T1134](https://attack.mitre.org/techniques/T1134/)**) read more about it **[here](https://www.elastic.co/blog/how-attackers-abuse-access-token-manipulation)**. 
 
+Another API is the CreateProcessWithTokenW that is used to create a process with a specific user’s token. C++ and C# structure is as follows.
+```C++
+BOOL CreateProcessWithTokenW(
+  [in]                HANDLE                hToken,
+  [in]                DWORD                 dwLogonFlags,
+  [in, optional]      LPCWSTR               lpApplicationName,
+  [in, out, optional] LPWSTR                lpCommandLine,
+  [in]                DWORD                 dwCreationFlags,
+  [in, optional]      LPVOID                lpEnvironment,
+  [in, optional]      LPCWSTR               lpCurrentDirectory,
+  [in]                LPSTARTUPINFOW        lpStartupInfo,
+  [out]               LPPROCESS_INFORMATION lpProcessInformation
+);
+```
+```C#
+[DllImport("advapi32", SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern bool CreateProcessWithTokenW(
+        IntPtr hToken,
+        UInt32 dwLogonFlags,
+        string lpApplicationName,
+        string lpCommandLine,
+        UInt32 dwCreationFlags,
+        IntPtr lpEnvironment,
+        string lpCurrentDirectory,
+        [In] ref STARTUPINFO lpStartupInfo,
+        out PROCESS_INFORMATION lpProcessInformation);
+```
+This API is also abused by malwares that utilizes the sub-technique of the above mentioned attack which is called "**Create Process with token i.e [T1134.002](https://attack.mitre.org/techniques/T1134/002/)**".
+
+**Note** - The CreateProcessWithLogonW and CreateProcessWithTokenW functions are similar to the CreateProcessAsUser function, except that the caller does not need to call the LogonUser function to authenticate the user and get a token.
+
+**CreateProcessWithTokenW** and **CreateProcessWithLogon** makes RPC calls to the Seclogon.dll which is the Secondary Logon Service of the Microsoft Windows operating system. Its startup setting is "manual": it runs only when the user or another program starts it. It resides in **C:\Windows\System32** and is hosted by the **svchost.exe** which is a shared-service process that serves as a shell for loading services from DLL files.
+The **seclogon.dll** exposes **SlrCreateProcessWithLogon** function called from **SeclCreateProcessWithLogonW**.
+```C
+DWORD SlrCreateProcessWithLogon(
+        RPC_BINDING_HANDLE BindingHandle,
+        PSECONDARYLOGONINFOW psli,
+        LPPROCESS_INFORMATION ProcessInformationOutput)
+``
+which internally calls another API i.e **CreateProcessAsUserA**
+```C
+BOOL CreateProcessAsUserA(
+  HANDLE                hToken,
+  LPCSTR                lpApplicationName,
+  LPSTR                 lpCommandLine,
+  LPSECURITY_ATTRIBUTES lpProcessAttributes,
+  LPSECURITY_ATTRIBUTES lpThreadAttributes,
+  BOOL                  bInheritHandles,
+  DWORD                 dwCreationFlags,
+  LPVOID                lpEnvironment,
+  LPCSTR                lpCurrentDirectory,
+  LPSTARTUPINFOA        lpStartupInfo,
+  LPPROCESS_INFORMATION lpProcessInformation
+);
+```
+```C#
+[DllImport("advapi32.dll", SetLastError=true, CharSet=CharSet.Unicode)]
+static extern bool CreateProcessAsUser(
+    IntPtr hToken,
+    string lpApplicationName,
+    string lpCommandLine,
+    ref SECURITY_ATTRIBUTES lpProcessAttributes,
+    ref SECURITY_ATTRIBUTES lpThreadAttributes,
+    bool bInheritHandles,
+    uint dwCreationFlags,
+    IntPtr lpEnvironment,
+    string lpCurrentDirectory,
+    ref STARTUPINFO lpStartupInfo,
+    out PROCESS_INFORMATION lpProcessInformation);
+```
+We can also call **CreateProcessAsUser** directly without using the seclogon service. For this you will need **SeAssignPrimaryToken** privilege that is assigned to windows service accounts. Then finally it calls **NtCreateUserProcess()** in the Ntdll file as above.
 
 (Writing is in progress ....)
