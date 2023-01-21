@@ -194,6 +194,8 @@ static extern bool CreateProcessAsUser(
     ref STARTUPINFO lpStartupInfo,
     out PROCESS_INFORMATION lpProcessInformation);
 ```
-We can also call **CreateProcessAsUser** directly without using the seclogon service. For this you will need **SeAssignPrimaryToken** privilege that is assigned to windows service accounts. Then finally it calls **NtCreateUserProcess()** in the Ntdll file as above.
+We can also call **CreateProcessAsUser** directly without using the seclogon service. For this you will need **SeAssignPrimaryToken** privilege that is assigned to windows service accounts. Then finally it calls **NtCreateUserProcess()** in the Ntdll file as above. Which then calls **NtCreateUserProcess()** in the kernel space.
 
-(Writing is in progress ....)
+Although this blog is a general overview of creating a simple process but under the hood things are complex which I will learn and explain it on later upcoming blogs.
+
+Hope you enjoyed reading it😃
