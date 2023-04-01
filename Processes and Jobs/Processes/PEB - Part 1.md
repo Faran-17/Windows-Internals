@@ -313,6 +313,8 @@ This indicates the architecture of the process.
 
 ![image](https://user-images.githubusercontent.com/59355783/229284527-ff245c55-9c7d-4a46-941d-a111ce4bf74f.png)
 
+The offset we got for it was 0x84 which means that cmd.exe is a 32-bit process and also indicates the Windows OS version. Check **[this](https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/pebteb/peb/bitfield.htm)** for more reference.
+
 
 
 Writing of this blog is in process...
