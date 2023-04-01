@@ -1,5 +1,5 @@
 # Summary
-In this blog, we will take a short look at how a simple process is created and what Win32 API functions are called just to create a small process. What functions are called from the user space dlls and finally transitioning into the kernel space. This will be a general overview, practical code execution will be included in later blogs.
+In this blog, we will take a short look at how a simple process is created and what Win32 API functions are called just to create a simple process. What functions are called from the user space dlls and finally transitioning into the kernel space. This will be a general overview, practical code execution will be included in later blogs.
 
 # What is a process?
 In simple words a process is an instance of a program running in the computer. We write our computer programs in a text file and when we execute this program, it becomes a process which performs all the tasks mentioned in the program. A process is usually defined as an instance of a running program and consists of two components:
