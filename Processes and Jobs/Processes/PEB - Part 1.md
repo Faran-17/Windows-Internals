@@ -1,6 +1,13 @@
 # Summary
 In this blog, we will take a look at what PEB is and it's inner workings using the a debugger. This will be a multipart series of blogs where I try to cover and understand different parameters of the PEB and it's structure. References are mentioned at the end.
 
+# Index
+1. **[What is PEB?](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#what-is-peb)**
+2. **[Structure of PEB](https://github.com/Faran-17/Windows-Internals/edit/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#structure-of-the-peb)**
+3. **[PEB analysis in WinDbg](https://github.com/Faran-17/Windows-Internals/edit/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#peb-analysis-in-windbg)**
+4. **[BeingDebugged](https://github.com/Faran-17/Windows-Internals/edit/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#beingdebugged)**
+5. **[BitField]()**
+
 # What is PEB?
 PEB is the representation of a process in the user space. This is the user-mode structure that has the most knowledge about a process. It contains direct details on the process, and many pointers to other structs holding even more data on the PE. Any process with a slightest user-mode footprint will have a corresponding PEB structure. The PEB is created by the kernel but is mostly operated from user-mode. It is used to store data that is managed by the user-mode, hence providing easier data access than transition to kernel mode or inter process communication. 
 
@@ -99,7 +106,13 @@ it’s own TEB structure.
 I've explained all this term in a very basic way but under the hood things get a little complext and Each structure deservers it's own attention and time which we will do in the future blogs.
 
 Before we move forwards, let's understand the basic flow of creation of and where everything fits.  
-1. 
+1. A new process(Eg. Cmd.exe) is started, this process will call the Win32API **[CreateProcess](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessa)** which sends the request to create the proccess.
+2. EPROCESS structure is created in the Kernel Space.
+3. Windows creates the process, virtual memory, and its representation of the physical memory and saves it inside the EPROCESS structure.
+4. PEB structures is created in the User Space with all the necessary information and then loads the two most importand DLLs Ntdll.dll and Kernel32.dll
+5. Loading the PE and starting the execution.
+
+To know more about the APIs that are called when you create a simple process. Check out my previous blog where I covered this topic **[here](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/Overview%20of%20process%20creation.md)**.
 
 Let's take a look at the PEB structure asn per official **[MSDN](https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-peb)**.
 ```Cpp
@@ -125,6 +138,180 @@ typedef struct _PEB {
   ULONG                         SessionId;
 } PEB, *PPEB;
 ```
+The PEB isn't fully documented. So we will take a look at in inside the WinDbg.
+
+```
+0:007> dt ntdll!_PEB
++0x000 InheritedAddressSpace : UChar
++0x001 ReadImageFileExecOptions : UChar
++0x002 BeingDebugged : UChar
++0x003 BitField : UChar
++0x003 ImageUsesLargePages : Pos 0, 1 Bit
++0x003 IsProtectedProcess : Pos 1, 1 Bit
++0x003 IsImageDynamicallyRelocated : Pos 2, 1 Bit
++0x003 SkipPatchingUser32Forwarders : Pos 3, 1 Bit
++0x003 IsPackagedProcess : Pos 4, 1 Bit
++0x003 IsAppContainer : Pos 5, 1 Bit
++0x003 IsProtectedProcessLight : Pos 6, 1 Bit
++0x003 IsLongPathAwareProcess : Pos 7, 1 Bit
++0x004 Padding0 : [4] UChar
++0x008 Mutant : Ptr64 Void
++0x010 ImageBaseAddress : Ptr64 Void
++0x018 Ldr : Ptr64 _PEB_LDR_DATA
++0x020 ProcessParameters : Ptr64 _RTL_USER_PROCESS_PARAMETERS
++0x028 SubSystemData : Ptr64 Void
++0x030 ProcessHeap : Ptr64 Void
++0x038 FastPebLock : Ptr64 _RTL_CRITICAL_SECTION
++0x040 AtlThunkSListPtr : Ptr64 _SLIST_HEADER
++0x048 IFEOKey : Ptr64 Void
++0x050 CrossProcessFlags : Uint4B
++0x050 ProcessInJob : Pos 0, 1 Bit
++0x050 ProcessInitializing : Pos 1, 1 Bit
++0x050 ProcessUsingVEH : Pos 2, 1 Bit
++0x050 ProcessUsingVCH : Pos 3, 1 Bit
++0x050 ProcessUsingFTH : Pos 4, 1 Bit
++0x050 ProcessPreviouslyThrottled : Pos 5, 1 Bit
++0x050 ProcessCurrentlyThrottled : Pos 6, 1 Bit
++0x050 ReservedBits0 : Pos 7, 25 Bits
++0x054 Padding1 : [4] UChar
++0x058 KernelCallbackTable : Ptr64 Void
++0x058 UserSharedInfoPtr : Ptr64 Void
++0x060 SystemReserved : Uint4B
++0x064 AtlThunkSListPtr32 : Uint4B
++0x068 ApiSetMap : Ptr64 Void
++0x070 TlsExpansionCounter : Uint4B
++0x074 Padding2 : [4] UChar
++0x078 TlsBitmap : Ptr64 Void
++0x080 TlsBitmapBits : [2] Uint4B
++0x088 ReadOnlySharedMemoryBase : Ptr64 Void
++0x090 SharedData : Ptr64 Void
++0x098 ReadOnlyStaticServerData : Ptr64 Ptr64 Void
++0x0a0 AnsiCodePageData : Ptr64 Void
++0x0a8 OemCodePageData : Ptr64 Void
++0x0b0 UnicodeCaseTableData : Ptr64 Void
++0x0b8 NumberOfProcessors : Uint4B
++0x0bc NtGlobalFlag : Uint4B
++0x0c0 CriticalSectionTimeout : _LARGE_INTEGER
++0x0c8 HeapSegmentReserve : Uint8B
++0x0d0 HeapSegmentCommit : Uint8B
++0x0d8 HeapDeCommitTotalFreeThreshold : Uint8B
++0x0e0 HeapDeCommitFreeBlockThreshold : Uint8B
+8/17
++0x0e8 NumberOfHeaps : Uint4B
++0x0ec MaximumNumberOfHeaps : Uint4B
++0x0f0 ProcessHeaps : Ptr64 Ptr64 Void
++0x0f8 GdiSharedHandleTable : Ptr64 Void
++0x100 ProcessStarterHelper : Ptr64 Void
++0x108 GdiDCAttributeList : Uint4B
++0x10c Padding3 : [4] UChar
++0x110 LoaderLock : Ptr64 _RTL_CRITICAL_SECTION
++0x118 OSMajorVersion : Uint4B
++0x11c OSMinorVersion : Uint4B
++0x120 OSBuildNumber : Uint2B
++0x122 OSCSDVersion : Uint2B
++0x124 OSPlatformId : Uint4B
++0x128 ImageSubsystem : Uint4B
++0x12c ImageSubsystemMajorVersion : Uint4B
++0x130 ImageSubsystemMinorVersion : Uint4B
++0x134 Padding4 : [4] UChar
++0x138 ActiveProcessAffinityMask : Uint8B
++0x140 GdiHandleBuffer : [60] Uint4B
++0x230 PostProcessInitRoutine : Ptr64 void
++0x238 TlsExpansionBitmap : Ptr64 Void
++0x240 TlsExpansionBitmapBits : [32] Uint4B
++0x2c0 SessionId : Uint4B
++0x2c4 Padding5 : [4] UChar
++0x2c8 AppCompatFlags : _ULARGE_INTEGER
++0x2d0 AppCompatFlagsUser : _ULARGE_INTEGER
++0x2d8 pShimData : Ptr64 Void
++0x2e0 AppCompatInfo : Ptr64 Void
++0x2e8 CSDVersion : _UNICODE_STRING
++0x2f8 ActivationContextData : Ptr64 _ACTIVATION_CONTEXT_DATA
++0x300 ProcessAssemblyStorageMap : Ptr64 _ASSEMBLY_STORAGE_MAP
++0x308 SystemDefaultActivationContextData : Ptr64 _ACTIVATION_CONTEXT_DATA
++0x310 SystemAssemblyStorageMap : Ptr64 _ASSEMBLY_STORAGE_MAP
++0x318 MinimumStackCommit : Uint8B
++0x320 FlsCallback : Ptr64 _FLS_CALLBACK_INFO
++0x328 FlsListHead : _LIST_ENTRY
++0x338 FlsBitmap : Ptr64 Void
++0x340 FlsBitmapBits : [4] Uint4B
++0x350 FlsHighIndex : Uint4B
++0x358 WerRegistrationData : Ptr64 Void
++0x360 WerShipAssertPtr : Ptr64 Void
++0x368 pUnused : Ptr64 Void
++0x370 pImageHeaderHash : Ptr64 Void
++0x378 TracingFlags : Uint4B
++0x378 HeapTracingEnabled : Pos 0, 1 Bit
++0x378 CritSecTracingEnabled : Pos 1, 1 Bit
++0x378 LibLoaderTracingEnabled : Pos 2, 1 Bit
++0x378 SpareTracingBits : Pos 3, 29 Bits
++0x37c Padding6 : [4] UChar
++0x380 CsrServerReadOnlySharedMemoryBase : Uint8B
++0x388 TppWorkerpListLock : Uint8B
++0x390 TppWorkerpList : _LIST_ENTRY
++0x3a0 WaitOnAddressHashTable : [128] Ptr64 Void
++0x7a0 TelemetryCoverageHeader : Ptr64 Void
++0x7a8 CloudFileFlags : Uint4B
+```
+There are lot of fields. In this blog series, I will try to cover as much as possible in a very simplistic way possible.
+
+# PEB analysis in WinDbg
+For this demonstration, we will pickup a simple executable CMD.exe and examine it's PEB structure inside WinDbg Preview. Start cmd.exe and open WinDbg Preview.
+
+![image](https://user-images.githubusercontent.com/59355783/229278028-b9d5323a-a01c-462b-9899-c6b92d2d93d4.png)
+
+Attach the cmd.exe process.
+
+![image](https://user-images.githubusercontent.com/59355783/229278077-a75d5674-7707-4f7f-ac1b-95c8f62c083e.png)
+
+The target process is sucessfully loaded into WinDbg. Now's let get the address of the PEB. There are two ways to get and we'll take a look at both of it.
+
+Open ProcessHacker tool and double click on the cmd.exe process. We can see that the PEB address is displayed
+
+![image](https://user-images.githubusercontent.com/59355783/229278269-2f2618e7-93d2-4517-9980-82782818be92.png)
+
+We can also use WinDbg command to get the PEB address.
+```
+0:001> r $peb
+$peb=0000004a69bb6000
+```
+Now loading the PEB structure of Cmd.exe with the command:
+```
+dt _peb @$peb
+```
+![image](https://user-images.githubusercontent.com/59355783/229278461-442ccad4-f232-429c-8c6e-ef093df7a9ce.png)
+
+We can also use similar command that has better visual
+```
+!peb
+```
+![image](https://user-images.githubusercontent.com/59355783/229278517-1bcd58b5-d889-4934-b899-015d65b42a6e.png)
+
+Let's start look at PEB's fields
+
+# BeingDebugged
+
+Indicates whether the specified process is currently being debugged by a user-mode debugger like OllyDbg, WinDbg etc. Some malware manually checked the PEB instead of using the API **```kernel32!IsDebuggerPresent()```**. The following code can be used to terminate the process if it is being debugged.
+
+```ASM
+.text:004010CD                 mov     eax, large fs:30h   ; PEB
+.text:004010D3                 db      3Eh                 ; IDA Pro display error (byte is actually used in next instruction)
+.text:004010D3                 cmp     byte ptr [eax+2], 1 ; PEB.BeingDebugged
+.text:004010D8                 jz      short loc_4010E1
+```
+
+```Cpp
+if (IsDebuggerPresent())
+    ExitProcess(-1);
+```
+
+If the byte ptr [eax+2] returns 1 which we got in our above output. Then it means that our current process is being debugged.
+
+# BitField
+
+This indicates the architecture of the process.
+
+![image](https://user-images.githubusercontent.com/59355783/229284527-ff245c55-9c7d-4a46-941d-a111ce4bf74f.png)
 
 
 
