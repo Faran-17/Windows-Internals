@@ -12,6 +12,7 @@ In this blog, we will take a look at what PEB is and it's inner workings using t
 8. **[SkipPatchingUser32Forwarders](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#skippatchinguser32forwarders)**
 9. **[IsLongPathAwareProcess](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#islongpathawareprocess)**
 10. **[ImageBaseAddress](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#imagebaseaddress)**
+11. **[LDR]()**
 
 # What is PEB?
 PEB is the representation of a process in the user space. This is the user-mode structure that has the most knowledge about a process. It contains direct details on the process, and many pointers to other structs holding even more data on the PE. Any process with a slightest user-mode footprint will have a corresponding PEB structure. The PEB is created by the kernel but is mostly operated from user-mode. It is used to store data that is managed by the user-mode, hence providing easier data access than transition to kernel mode or inter process communication. 
@@ -387,6 +388,172 @@ The **```ImageBaseAddress```** is important because it is the base address at wh
 We can take a look at it using WinDbg
 
 ![image](https://user-images.githubusercontent.com/59355783/229346336-d19b029b-a8dc-45ae-a19c-bb1f7dc562b9.png)
+
+# LDR
+
+One of the fields in the PEB structure is the Loader Data Table (LDR) field, which contains information about all the loaded modules (i.e., DLLs and executables) in the process's address space.
+
+When a process starts, the operating system creates the LDR field in the PEB structure and initializes it with an LDR entry for the process's main executable image. As the process loads additional modules into its address space, new LDR entries are added to the LDR field to describe these modules.
+
+The LDR field is important because it provides the operating system with information about the loaded modules in a process's address space. This information is used to resolve symbols, calculate virtual memory addresses, and perform other tasks necessary to properly execute the code in the process.
+
+![image](https://user-images.githubusercontent.com/59355783/229349180-104c5895-6101-4930-9d18-903bce1d576c.png)
+
+Click on the LDR hyperlink.
+
+![image](https://user-images.githubusercontent.com/59355783/229349200-efa7f43b-a86c-4036-90b2-19d1e0c00c13.png)
+
+This displays its structure. 
+
+```
+0:001> dx -r1 ((ntdll!_PEB_LDR_DATA *)0x7ffa92a9a4c0)
+((ntdll!_PEB_LDR_DATA *)0x7ffa92a9a4c0)                 : 0x7ffa92a9a4c0 [Type: _PEB_LDR_DATA *]
+    [+0x000] Length           : 0x58 [Type: unsigned long]
+    [+0x004] Initialized      : 0x1 [Type: unsigned char]
+    [+0x008] SsHandle         : 0x0 [Type: void *]
+    [+0x010] InLoadOrderModuleList [Type: _LIST_ENTRY]
+    [+0x020] InMemoryOrderModuleList [Type: _LIST_ENTRY]
+    [+0x030] InInitializationOrderModuleList [Type: _LIST_ENTRY]
+    [+0x040] EntryInProgress  : 0x0 [Type: void *]
+    [+0x048] ShutdownInProgress : 0x0 [Type: unsigned char]
+    [+0x050] ShutdownThreadId : 0x0 [Type: void *]
+```
+
+It has three important lists as highlighted. If we take a look at anyone of the list structure.
+
+```
+0:001> dx -r1 (*((ntdll!_LIST_ENTRY *)0x7ffa92a9a4d0))
+(*((ntdll!_LIST_ENTRY *)0x7ffa92a9a4d0))                 [Type: _LIST_ENTRY]
+    [+0x000] Flink            : 0x29d7c1b2fa0 [Type: _LIST_ENTRY *]
+    [+0x008] Blink            : 0x29d7c1b4a90 [Type: _LIST_ENTRY *]
+```
+
+We can see these are doubly-linked list. As per MSDN 
+
+```Cpp
+typedef struct _LIST_ENTRY {
+   struct _LIST_ENTRY *Flink;
+   struct _LIST_ENTRY *Blink;
+} LIST_ENTRY, *PLIST_ENTRY, *RESTRICTED_POINTER PRLIST_ENTRY;
+```
+
+And each of the list entry has a structure like this.
+
+```Cpp
+typedef struct _LDR_DATA_TABLE_ENTRY {
+    PVOID Reserved1[2];
+    LIST_ENTRY InMemoryOrderLinks;
+    PVOID Reserved2[2];
+    PVOID DllBase;
+    PVOID EntryPoint;
+    PVOID Reserved3;
+    UNICODE_STRING FullDllName;
+    BYTE Reserved4[8];
+    PVOID Reserved5[3];
+    union {
+        ULONG CheckSum;
+        PVOID Reserved6;
+    };
+    ULONG TimeDateStamp;
+} LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
+```
+
+But if we use the Windbg command we will get more detailed list.
+
+```
+0:001> dt _LDR_DATA_TABLE_ENTRY
+ntdll!_LDR_DATA_TABLE_ENTRY
+   +0x000 InLoadOrderLinks : _LIST_ENTRY
+   +0x010 InMemoryOrderLinks : _LIST_ENTRY
+   +0x020 InInitializationOrderLinks : _LIST_ENTRY
+   +0x030 DllBase          : Ptr64 Void
+   +0x038 EntryPoint       : Ptr64 Void
+   +0x040 SizeOfImage      : Uint4B
+   +0x048 FullDllName      : _UNICODE_STRING
+   +0x058 BaseDllName      : _UNICODE_STRING
+   +0x068 FlagGroup        : [4] UChar
+   +0x068 Flags            : Uint4B
+   +0x068 PackagedBinary   : Pos 0, 1 Bit
+   +0x068 MarkedForRemoval : Pos 1, 1 Bit
+   +0x068 ImageDll         : Pos 2, 1 Bit
+   +0x068 LoadNotificationsSent : Pos 3, 1 Bit
+   +0x068 TelemetryEntryProcessed : Pos 4, 1 Bit
+   +0x068 ProcessStaticImport : Pos 5, 1 Bit
+   +0x068 InLegacyLists    : Pos 6, 1 Bit
+   +0x068 InIndexes        : Pos 7, 1 Bit
+   +0x068 ShimDll          : Pos 8, 1 Bit
+   +0x068 InExceptionTable : Pos 9, 1 Bit
+   +0x068 ReservedFlags1   : Pos 10, 2 Bits
+   +0x068 LoadInProgress   : Pos 12, 1 Bit
+   +0x068 LoadConfigProcessed : Pos 13, 1 Bit
+   +0x068 EntryProcessed   : Pos 14, 1 Bit
+   +0x068 ProtectDelayLoad : Pos 15, 1 Bit
+   +0x068 ReservedFlags3   : Pos 16, 2 Bits
+   +0x068 DontCallForThreads : Pos 18, 1 Bit
+   +0x068 ProcessAttachCalled : Pos 19, 1 Bit
+   +0x068 ProcessAttachFailed : Pos 20, 1 Bit
+   +0x068 CorDeferredValidate : Pos 21, 1 Bit
+   +0x068 CorImage         : Pos 22, 1 Bit
+   +0x068 DontRelocate     : Pos 23, 1 Bit
+   +0x068 CorILOnly        : Pos 24, 1 Bit
+   +0x068 ChpeImage        : Pos 25, 1 Bit
+   +0x068 ReservedFlags5   : Pos 26, 2 Bits
+   +0x068 Redirected       : Pos 28, 1 Bit
+   +0x068 ReservedFlags6   : Pos 29, 2 Bits
+   +0x068 CompatDatabaseProcessed : Pos 31, 1 Bit
+   +0x06c ObsoleteLoadCount : Uint2B
+   +0x06e TlsIndex         : Uint2B
+   +0x070 HashLinks        : _LIST_ENTRY
+   +0x080 TimeDateStamp    : Uint4B
+   +0x088 EntryPointActivationContext : Ptr64 _ACTIVATION_CONTEXT
+   +0x090 Lock             : Ptr64 Void
+   +0x098 DdagNode         : Ptr64 _LDR_DDAG_NODE
+   +0x0a0 NodeModuleLink   : _LIST_ENTRY
+   +0x0b0 LoadContext      : Ptr64 _LDRP_LOAD_CONTEXT
+   +0x0b8 ParentDllBase    : Ptr64 Void
+   +0x0c0 SwitchBackContext : Ptr64 Void
+   +0x0c8 BaseAddressIndexNode : _RTL_BALANCED_NODE
+   +0x0e0 MappingInfoIndexNode : _RTL_BALANCED_NODE
+   +0x0f8 OriginalBase     : Uint8B
+   +0x100 LoadTime         : _LARGE_INTEGER
+   +0x108 BaseNameHashValue : Uint4B
+   +0x10c LoadReason       : _LDR_DLL_LOAD_REASON
+   +0x110 ImplicitPathOptions : Uint4B
+   +0x114 ReferenceCount   : Uint4B
+   +0x118 DependentLoadFlags : Uint4B
+   +0x11c SigningLevel     : UChar
+```
+
+Now loading the LDR Data.
+
+```
+0:001> dt _PEB_LDR_DATA 0x7ffa92a9a4c0
+ntdll!_PEB_LDR_DATA
+   +0x000 Length           : 0x58
+   +0x004 Initialized      : 0x1 ''
+   +0x008 SsHandle         : (null) 
+   +0x010 InLoadOrderModuleList : _LIST_ENTRY [ 0x0000029d`7c1b2fa0 - 0x0000029d`7c1b4a90 ]
+   +0x020 InMemoryOrderModuleList : _LIST_ENTRY [ 0x0000029d`7c1b2fb0 - 0x0000029d`7c1b4aa0 ]
+   +0x030 InInitializationOrderModuleList : _LIST_ENTRY [ 0x0000029d`7c1b2e30 - 0x0000029d`7c1b4ab0 ]
+   +0x040 EntryInProgress  : (null) 
+   +0x048 ShutdownInProgress : 0 ''
+   +0x050 ShutdownThreadId : (null)
+```
+
+It will load the LDR struct. Now take a look at **```InLoadOrderModuelList```***.
+
+![image](https://user-images.githubusercontent.com/59355783/229349802-c4e7e144-912e-463c-b453-2d7da140fbd9.png)
+
+1. It contains the path of the exe that is loaded. In which case it’s "cmd.exe"
+2. The base address of the cmd.exe. Let’s confirm
+
+![image](https://user-images.githubusercontent.com/59355783/229349851-518db39c-2422-443f-9ca6-066b3686472b.png)
+
+3. The address of the next LIST ENTRY, which is InMemoryOrderModuleList
+
+![image](https://user-images.githubusercontent.com/59355783/229349914-7e60d691-5284-401f-a13d-d7817771c911.png)
+
+The PEB LDR is a topic of its own I will explain it later in some other blog. 
 
 
 
