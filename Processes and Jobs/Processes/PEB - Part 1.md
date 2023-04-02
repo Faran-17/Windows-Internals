@@ -7,6 +7,8 @@ In this blog, we will take a look at what PEB is and it's inner workings using t
 3. **[PEB analysis in WinDbg](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#peb-analysis-in-windbg)**
 4. **[BeingDebugged](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#beingdebugged)**
 5. **[BitField](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#bitfield)**
+6. **[Protected Process]()**
+7. **[IsImageDynamicallyRelocated ]()**
 
 # What is PEB?
 PEB is the representation of a process in the user space. This is the user-mode structure that has the most knowledge about a process. It contains direct details on the process, and many pointers to other structs holding even more data on the PE. Any process with a slightest user-mode footprint will have a corresponding PEB structure. The PEB is created by the kernel but is mostly operated from user-mode. It is used to store data that is managed by the user-mode, hence providing easier data access than transition to kernel mode or inter process communication. 
@@ -315,6 +317,23 @@ This indicates the architecture of the process.
 
 The offset we got for it was 0x84 which means that cmd.exe is a 32-bit process and also indicates the Windows OS version. Check **[this](https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/pebteb/peb/bitfield.htm)** for more reference.
 
+# Protected Process
+
+![image](https://user-images.githubusercontent.com/59355783/229335144-01a9a9cd-9ac9-47c9-aec2-e6a30bb3a85e.png)
+
+The **```IsProtectedProcess```** and **```IsProtectedProcessLight```** are used to check if the current process is protected or not. Microsoft use these mechanisms to protect their own System processes from being abused by malicious software or forcefully shut down by a third-party source.
+
+All of this is enforced from kernel mode by the Windows Kernel using the undocumented and opaque EPROCESS structure, and you cannot write to these fields in the PEB structure and have the changes take effect because it won’t update the EPROCESS structure for the current process.
+
+# IsImageDynamicallyRelocated 
+
+![image](https://user-images.githubusercontent.com/59355783/229343435-67d72dc7-ed22-44f3-9247-76bcf25785b2.png)
+
+The **```IsImageDynamicallyRelocated```** flag is a boolean value indicating whether the current process's executable image has been dynamically relocated at runtime. Dynamic relocation is a process by which the operating system loads an executable image at a memory location different from the address specified in the image's headers. This is done to avoid conflicts with other processes that may be using the same memory address space.
+
+When a process is dynamically relocated, the operating system modifies certain pointers and addresses in the image's headers to reflect the new memory location. The IsImageDynamicallyRelocated flag in the PEB is set to true if this process has been performed on the current process.
+
+Programs can access the IsImageDynamicallyRelocated flag through the Process Environment Block (PEB) data structure by calling the Win32 API function **[GetModuleHandleEx](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulehandleexa)** with the **[GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulehandleexa#get_module_handle_ex_flag_unchanged_refcount-0x00000002)** flag. This function retrieves a handle to a module and updates the reference count for the module, but does not load the module if it has not been loaded yet. The function also sets the IsImageDynamicallyRelocated flag in the PEB if the module has been dynamically relocated.
 
 
 Writing of this blog is in process...
