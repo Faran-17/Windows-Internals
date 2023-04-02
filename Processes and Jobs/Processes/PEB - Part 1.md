@@ -3,9 +3,9 @@ In this blog, we will take a look at what PEB is and it's inner workings using t
 
 # Index
 1. **[What is PEB?](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#what-is-peb)**
-2. **[Structure of PEB](https://github.com/Faran-17/Windows-Internals/edit/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#structure-of-the-peb)**
-3. **[PEB analysis in WinDbg](https://github.com/Faran-17/Windows-Internals/edit/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#peb-analysis-in-windbg)**
-4. **[BeingDebugged](https://github.com/Faran-17/Windows-Internals/edit/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#beingdebugged)**
+2. **[Structure of PEB](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#structure-of-the-peb)**
+3. **[PEB analysis in WinDbg](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#peb-analysis-in-windbg)**
+4. **[BeingDebugged](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#beingdebugged)**
 5. **[BitField]()**
 
 # What is PEB?
