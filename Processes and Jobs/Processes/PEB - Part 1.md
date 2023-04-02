@@ -9,6 +9,9 @@ In this blog, we will take a look at what PEB is and it's inner workings using t
 5. **[BitField](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#bitfield)**
 6. **[Protected Process]()**
 7. **[IsImageDynamicallyRelocated ]()**
+8. **[SkipPatchingUser32Forwarders]()**
+9. **[IsLongPathAwareProcess]()**
+10. **[ImageBaseAddress]()**
 
 # What is PEB?
 PEB is the representation of a process in the user space. This is the user-mode structure that has the most knowledge about a process. It contains direct details on the process, and many pointers to other structs holding even more data on the PE. Any process with a slightest user-mode footprint will have a corresponding PEB structure. The PEB is created by the kernel but is mostly operated from user-mode. It is used to store data that is managed by the user-mode, hence providing easier data access than transition to kernel mode or inter process communication. 
@@ -334,6 +337,57 @@ The **```IsImageDynamicallyRelocated```** flag is a boolean value indicating whe
 When a process is dynamically relocated, the operating system modifies certain pointers and addresses in the image's headers to reflect the new memory location. The IsImageDynamicallyRelocated flag in the PEB is set to true if this process has been performed on the current process.
 
 Programs can access the IsImageDynamicallyRelocated flag through the Process Environment Block (PEB) data structure by calling the Win32 API function **[GetModuleHandleEx](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulehandleexa)** with the **[GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getmodulehandleexa#get_module_handle_ex_flag_unchanged_refcount-0x00000002)** flag. This function retrieves a handle to a module and updates the reference count for the module, but does not load the module if it has not been loaded yet. The function also sets the IsImageDynamicallyRelocated flag in the PEB if the module has been dynamically relocated.
+
+# SkipPatchingUser32Forwarders
+
+![image](https://user-images.githubusercontent.com/59355783/229345019-2cbef7ea-1c34-48fa-a06f-3a64ac9eb568.png)
+
+The **```SkipPatchingUser32Forwarders```** field in the Process Environment Block (PEB) structure is a bit flag that is used by the Windows operating system to control the patching of certain user-mode library functions in the process.
+
+When a process loads the user32.dll library, the operating system normally applies a process-specific set of patches to certain exported functions in the library. These patches are known as "forwarders" and are used to redirect calls to these functions to a different location within the library or to an entirely different library altogether. This process is known as "forwarding".
+
+The **```SkipPatchingUser32Forwarders```** flag controls whether or not these forwarders are applied in the current process. When the flag is set to 1, the operating system will skip the patching of forwarders in the user32.dll library. When the flag is set to 0, the operating system will apply the forwarder patches as normal.
+
+The primary use case for setting the **```SkipPatchingUser32Forwarders```** flag is to improve the startup time of certain types of processes. The patching process can be time-consuming, especially for processes that make heavy use of the user32.dll library. By skipping the patching step, the process can be started more quickly and without the overhead of the patching process.
+
+However, it's worth noting that skipping the patching of forwarders can potentially cause compatibility issues with certain types of applications. In general, it's recommended to only set the **```SkipPatchingUser32Forwarders```** flag if it is known to be safe and necessary for the specific application or scenario.
+
+The **```SkipPatchingUser32Forwarders```** flag is set to 1 by default on 64-bit versions of Windows, which means that forwarders are skipped unless explicitly enabled. On 32-bit versions of Windows, the flag is set to 0 by default, which means that forwarders are applied unless explicitly disabled.
+
+To explicitly enable or disable the **```SkipPatchingUser32Forwarders```** flag, you can use the **[SetProcessMitigationPolicy](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setprocessmitigationpolicy)** API.
+
+```
+BOOL SetProcessMitigationPolicy(
+  [in] PROCESS_MITIGATION_POLICY MitigationPolicy,
+  [in] PVOID                     lpBuffer,
+  [in] SIZE_T                    dwLength
+);
+```
+
+# IsLongPathAwareProcess
+
+![image](https://user-images.githubusercontent.com/59355783/229345697-559a3125-2011-40e6-915d-0082996bb652.png)
+
+The **`IsLongPathAwareProcess`** field in the Process Environment Block (PEB) structure is a boolean flag that indicates whether the current process is aware of long paths. Long paths are paths that exceed the maximum path length of 260 characters in the Windows operating system.
+
+When a process is long path aware, it can handle long paths in its file I/O operations without encountering any errors or exceptions. This is because long paths require a special prefix (**`\\?\`**) to be specified, and not all software is capable of handling these paths correctly
+
+A value of 1 for the **`IsLongPathAwareProcess`** field indicates that the current process is aware of long paths, while a value of 0 indicates that it is not. This flag is set by the operating system when the process is started, based on certain conditions such as the presence of a manifest file that specifies long path awareness.
+
+# ImageBaseAddress
+
+![image](https://user-images.githubusercontent.com/59355783/229346244-ce02380e-05c2-45e6-bb8a-576ea13fde88.png)
+
+In the context of the Process Environment Block (PEB) structure in Windows, the term **```ImageBaseAddress```** refers to the virtual memory address at which the executable image of a process is loaded in memory.
+
+When a process is started in Windows, the operating system creates a new process object and allocates a block of virtual memory for the process to use. The executable image of the process is then loaded into this virtual memory space, and the process is initialized and executed. The **```ImageBaseAddress```** field in the PEB structure contains the virtual memory address at which the first module in the process's module list is loaded.
+
+The **```ImageBaseAddress```** is important because it is the base address at which all the code and data in the process's executable image are loaded into memory. When the process is executed, the processor uses the **```ImageBaseAddress```** to calculate the virtual memory addresses of all the instructions and data in the process's code. This allows the operating system to properly link and execute the code, and enables the process to access and modify its own data.
+
+We can take a look at it using WinDbg
+
+![image](https://user-images.githubusercontent.com/59355783/229346336-d19b029b-a8dc-45ae-a19c-bb1f7dc562b9.png)
+
 
 
 Writing of this blog is in process...
