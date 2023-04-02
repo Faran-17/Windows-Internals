@@ -7,11 +7,11 @@ In this blog, we will take a look at what PEB is and it's inner workings using t
 3. **[PEB analysis in WinDbg](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#peb-analysis-in-windbg)**
 4. **[BeingDebugged](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#beingdebugged)**
 5. **[BitField](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#bitfield)**
-6. **[Protected Process]()**
-7. **[IsImageDynamicallyRelocated ]()**
-8. **[SkipPatchingUser32Forwarders]()**
-9. **[IsLongPathAwareProcess]()**
-10. **[ImageBaseAddress]()**
+6. **[Protected Process](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#protected-process)**
+7. **[IsImageDynamicallyRelocated ](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#isimagedynamicallyrelocated)**
+8. **[SkipPatchingUser32Forwarders](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#skippatchinguser32forwarders)**
+9. **[IsLongPathAwareProcess](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#islongpathawareprocess)**
+10. **[ImageBaseAddress](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#imagebaseaddress)**
 
 # What is PEB?
 PEB is the representation of a process in the user space. This is the user-mode structure that has the most knowledge about a process. It contains direct details on the process, and many pointers to other structs holding even more data on the PE. Any process with a slightest user-mode footprint will have a corresponding PEB structure. The PEB is created by the kernel but is mostly operated from user-mode. It is used to store data that is managed by the user-mode, hence providing easier data access than transition to kernel mode or inter process communication. 
