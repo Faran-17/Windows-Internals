@@ -555,7 +555,109 @@ It will load the LDR struct. Now take a look at **```InLoadOrderModuelList```***
 
 The PEB LDR is a topic of its own I will explain it later in some other blog. 
 
+# Process Parameters
+
+The ProcessParameters field contains information about the command line and environment variables used to start the process.
+
+![image](https://user-images.githubusercontent.com/59355783/230592651-8ba1d08c-f379-4737-88e4-49b700f4f7fb.png)
+
+This uses **```_RTL_USER_PROCESS_PARAMETERS```** structure. We can take a look at it in Windbg.
+
+```
+0:001> dx -r1 ((ntdll!_RTL_USER_PROCESS_PARAMETERS *)0x29d7c1b2550)
+((ntdll!_RTL_USER_PROCESS_PARAMETERS *)0x29d7c1b2550)                 : 0x29d7c1b2550 [Type: _RTL_USER_PROCESS_PARAMETERS *]
+    [+0x000] MaximumLength    : 0x7aa [Type: unsigned long]
+    [+0x004] Length           : 0x7aa [Type: unsigned long]
+    [+0x008] Flags            : 0x6001 [Type: unsigned long]
+    [+0x00c] DebugFlags       : 0x0 [Type: unsigned long]
+    [+0x010] ConsoleHandle    : 0x44 [Type: void *]
+    [+0x018] ConsoleFlags     : 0x0 [Type: unsigned long]
+    [+0x020] StandardInput    : 0x50 [Type: void *]
+    [+0x028] StandardOutput   : 0x54 [Type: void *]
+    [+0x030] StandardError    : 0x58 [Type: void *]
+    [+0x038] CurrentDirectory [Type: _CURDIR]
+    [+0x050] DllPath          [Type: _UNICODE_STRING]
+    [+0x060] ImagePathName    [Type: _UNICODE_STRING]
+    [+0x070] CommandLine      [Type: _UNICODE_STRING]
+    [+0x080] Environment      : 0x29d7c1c5540 [Type: void *]
+    [+0x088] StartingX        : 0x0 [Type: unsigned long]
+    [+0x08c] StartingY        : 0x0 [Type: unsigned long]
+    [+0x090] CountX           : 0x0 [Type: unsigned long]
+    [+0x094] CountY           : 0x0 [Type: unsigned long]
+    [+0x098] CountCharsX      : 0x0 [Type: unsigned long]
+    [+0x09c] CountCharsY      : 0x0 [Type: unsigned long]
+    [+0x0a0] FillAttribute    : 0x0 [Type: unsigned long]
+    [+0x0a4] WindowFlags      : 0x801 [Type: unsigned long]
+    [+0x0a8] ShowWindowFlags  : 0x1 [Type: unsigned long]
+    [+0x0b0] WindowTitle      [Type: _UNICODE_STRING]
+    [+0x0c0] DesktopInfo      [Type: _UNICODE_STRING]
+    [+0x0d0] ShellInfo        [Type: _UNICODE_STRING]
+    [+0x0e0] RuntimeData      [Type: _UNICODE_STRING]
+    [+0x0f0] CurrentDirectores [Type: _RTL_DRIVE_LETTER_CURDIR [32]]
+    [+0x3f0] EnvironmentSize  : 0x1584 [Type: unsigned __int64]
+    [+0x3f8] EnvironmentVersion : 0x5 [Type: unsigned __int64]
+    [+0x400] PackageDependencyData : 0x0 [Type: void *]
+    [+0x408] ProcessGroupId   : 0x244 [Type: unsigned long]
+    [+0x40c] LoaderThreads    : 0x0 [Type: unsigned long]
+    [+0x410] RedirectionDllName [Type: _UNICODE_STRING]
+    [+0x420] HeapPartitionName [Type: _UNICODE_STRING]
+    [+0x430] DefaultThreadpoolCpuSetMasks : 0x0 [Type: unsigned __int64 *]
+    [+0x438] DefaultThreadpoolCpuSetMaskCount : 0x0 [Type: unsigned long]
+    [+0x43c] DefaultThreadpoolThreadMaximum : 0x0 [Type: unsigned long]
+```
+
+Here is the full structure of it from the undocumented **[website](http://undocumented.ntinternals.net/index.html?page=UserMode%2FStructures%2FRTL_USER_PROCESS_PARAMETERS.html)**
+
+```Cpp
+typedef struct _RTL_USER_PROCESS_PARAMETERS {
+  ULONG                   MaximumLength;
+  ULONG                   Length;
+  ULONG                   Flags;
+  ULONG                   DebugFlags;
+  PVOID                   ConsoleHandle;
+  ULONG                   ConsoleFlags;
+  HANDLE                  StdInputHandle;
+  HANDLE                  StdOutputHandle;
+  HANDLE                  StdErrorHandle;
+  UNICODE_STRING          CurrentDirectoryPath;
+  HANDLE                  CurrentDirectoryHandle;
+  UNICODE_STRING          DllPath;
+  UNICODE_STRING          ImagePathName;
+  UNICODE_STRING          CommandLine;
+  PVOID                   Environment;
+  ULONG                   StartingPositionLeft;
+  ULONG                   StartingPositionTop;
+  ULONG                   Width;
+  ULONG                   Height;
+  ULONG                   CharWidth;
+  ULONG                   CharHeight;
+  ULONG                   ConsoleTextAttributes;
+  ULONG                   WindowFlags;
+  ULONG                   ShowWindowFlags;
+  UNICODE_STRING          WindowTitle;
+  UNICODE_STRING          DesktopName;
+  UNICODE_STRING          ShellInfo;
+  UNICODE_STRING          RuntimeData;
+  RTL_DRIVE_LETTER_CURDIR DLCurrentDirectory[0x20];
+
+} RTL_USER_PROCESS_PARAMETERS, *PRTL_USER_PROCESS_PARAMETERS;
+```
+
+Let’s take a look at it. **```dt _RTL_USER_PROCESS_PARAMETERS 0x0000029d`7c1b2550```**
+
+![image](https://user-images.githubusercontent.com/59355783/230593148-c6ea7ce0-b2e1-4730-b93e-54800cc0fdc6.png)
+
+You can see the full path of the cmd.exe 
+
+This is the end of the part 1 of understanding the internals of PEB. In the next part, we will take a look at more fields inside PEB. Stay tuned :blush:
 
 
-Writing of this blog is in process...
+# References 
+
+1. **[https://www.ired.team/miscellaneous-reversing-forensics/windows-kernel-internals/exploring-process-environment-block](https://www.ired.team/miscellaneous-reversing-forensics/windows-kernel-internals/exploring-process-environment-block)**
+2. **[https://mohamed-fakroud.gitbook.io/red-teamings-dojo/windows-internals/peb](https://mohamed-fakroud.gitbook.io/red-teamings-dojo/windows-internals/peb)**
+3. **[https://papers.vx-underground.org/papers/Malware%20Defense/Malware%20Analysis%202018/2018-02-26%20-%20Anatomy%20of%20the%20Process%20Environment%20Block%20(PEB)%20(Windows%20Internals).pdf](https://papers.vx-underground.org/papers/Malware%20Defense/Malware%20Analysis%202018/2018-02-26%20-%20Anatomy%20of%20the%20Process%20Environment%20Block%20(PEB)%20(Windows%20Internals).pdf)**
+4. **[https://dosxuz.gitlab.io/post/perunsfart/](https://dosxuz.gitlab.io/post/perunsfart/)**
+5. **[https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/pebteb/peb/index.htm](https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/pebteb/peb/index.htm)**
+
 
