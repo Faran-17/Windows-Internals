@@ -1,5 +1,5 @@
 # Summary
-In this blog, we will take a look at what PEB is and it's inner workings using the a debugger. This will be a multipart series of blogs where I try to cover and understand different parameters of the PEB and it's structure. References are mentioned at the end.
+In this blog, we will take a look at what PEB is and it's inner workings using a debugger. This will be a multipart series of blogs where I try to cover and understand different parameters of the PEB and it's structure. References are mentioned at the end.
 
 # Index
 1. **[What is PEB?](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#what-is-peb)**
