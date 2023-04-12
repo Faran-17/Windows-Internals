@@ -27,7 +27,7 @@ In the above diagram, we can see that the PEB structure lies on the user space. 
 
 The kernel space in the Windows OS is divided into three parts, the HAL, the Kernel and the Executive Subsystem. The Executive subsystem deals with general OS policies and operation, the Kernel deals with process architecture details and low-level operations. The HAL deals with differences that arise in particular implementations of a processor architecture. Although they have their own complexity which are topics of their own.
 
-So when we create a new process, both the Kernel and Executive Subsystem wants to track it, for thier own purposes. The structure that the Kernel uses to track the process is the KPROCESS and the structure that the Executive Subsystems use to track it is the EPROCESS. Also if we consider, the KPROCESS is the first field of the EPROCESS. Let's take a look at it's structure in a Kernel debugger.
+So when we create a new process, both the Kernel and Executive Subsystem wants to track it, for their own purposes. The structure that the Kernel uses to track the process is the KPROCESS and the structure that the Executive Subsystems use to track it is the EPROCESS. Also if we consider, the KPROCESS is the first field of the EPROCESS. Let's take a look at it's structure in a Kernel debugger.
 
 ```
 lkd> dt _eprocess
