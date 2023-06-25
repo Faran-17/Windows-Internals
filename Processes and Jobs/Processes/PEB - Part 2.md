@@ -128,6 +128,28 @@ DECLSPEC_ALLOCATOR LPVOID HeapReAlloc(
 );
 ```
 
+# FastPEBLock
+The **`FastPebLock`** field in the Process Environment Block (PEB) structure is a synchronization mechanism used to provide thread safety when accessing the PEB structure. It is a fast, lightweight lock that is used to ensure that only one thread can access or modify the PEB structure at a time.  
+The purpose of the **`FastPebLock`** is to prevent data corruption or inconsistencies when multiple threads are simultaneously accessing or modifying the PEB structure. It helps to maintain the integrity of the data stored in the PEB and ensures that concurrent access to the structure is properly synchronized.  
+The **`FastPebLock`** is implemented as a slim reader/writer lock. It allows multiple threads to simultaneously read the PEB structure, while ensuring that only one thread can hold a write lock to modify the structure at a time.  
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/778466a4-4efb-44a5-81e6-6d87ca34e396)  
+The **`RtlAcquirePebLock()`** function is used to acquire the **`FastPebLock`** before accessing or modifying the PEB structure. This ensures that only one thread can access the PEB at a time, preventing data corruption or inconsistencies.
+```CPP
+RtlAcquirePebLock(VOID)
+{
+   PPEB Peb = NtCurrentPeb ();
+   RtlEnterCriticalSection(Peb->FastPebLock);
+}
+```
+The RtlReleasePebLock() function is used to release the FastPebLock after the necessary operations on the PEB structure have been performed.
+```CPP
+RtlReleasePebLock(VOID)
+{
+   PPEB Peb = NtCurrentPeb ();
+   RtlLeaveCriticalSection(Peb->FastPebLock);
+}
+```
+
 
 
 
