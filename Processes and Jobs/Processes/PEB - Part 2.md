@@ -150,6 +150,170 @@ RtlReleasePebLock(VOID)
 }
 ```
 
+# KernelCallbackTable
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/7578faad-2be3-4b25-9c68-f58e3b2e315b)
+The **`KernelCallbackTable`** field in the PEB structure is a pointer to an array of kernel-mode callback function pointers. Kernel-mode callbacks are a mechanism in Windows that allow registered drivers or kernel components to intercept and handle specific system events or operations.  
+The array pointed to by **`KernelCallbackTable`** contains function pointers that correspond to different callback routines. These callback routines are called by the Windows kernel when certain events occur, such as process or thread creation, registry operations, file system operations, and more.  
+The `KernelCallbackTable` can be found in the PEB and is initialized to an array of functions when user32.dll is loaded into a GUI process.  
+Here is the struct of it.  
+```CPP
+typedef struct _KERNELCALLBACKTABLE_T {
+  ULONG_PTR __fnCOPYDATA;
+  ULONG_PTR __fnCOPYGLOBALDATA;
+  ULONG_PTR __fnDWORD;
+  ULONG_PTR __fnNCDESTROY;
+  ULONG_PTR __fnDWORDOPTINLPMSG;
+  ULONG_PTR __fnINOUTDRAG;
+  ULONG_PTR __fnGETTEXTLENGTHS;
+  ULONG_PTR __fnINCNTOUTSTRING;
+  ULONG_PTR __fnPOUTLPINT;
+  ULONG_PTR __fnINLPCOMPAREITEMSTRUCT;
+  ULONG_PTR __fnINLPCREATESTRUCT;
+  ULONG_PTR __fnINLPDELETEITEMSTRUCT;
+  ULONG_PTR __fnINLPDRAWITEMSTRUCT;
+  ULONG_PTR __fnPOPTINLPUINT;
+  ULONG_PTR __fnPOPTINLPUINT2;
+  ULONG_PTR __fnINLPMDICREATESTRUCT;
+  ULONG_PTR __fnINOUTLPMEASUREITEMSTRUCT;
+  ULONG_PTR __fnINLPWINDOWPOS;
+  ULONG_PTR __fnINOUTLPPOINT5;
+  ULONG_PTR __fnINOUTLPSCROLLINFO;
+  ULONG_PTR __fnINOUTLPRECT;
+  ULONG_PTR __fnINOUTNCCALCSIZE;
+  ULONG_PTR __fnINOUTLPPOINT5_;
+  ULONG_PTR __fnINPAINTCLIPBRD;
+  ULONG_PTR __fnINSIZECLIPBRD;
+  ULONG_PTR __fnINDESTROYCLIPBRD;
+  ULONG_PTR __fnINSTRING;
+  ULONG_PTR __fnINSTRINGNULL;
+  ULONG_PTR __fnINDEVICECHANGE;
+  ULONG_PTR __fnPOWERBROADCAST;
+  ULONG_PTR __fnINLPUAHDRAWMENU;
+  ULONG_PTR __fnOPTOUTLPDWORDOPTOUTLPDWORD;
+  ULONG_PTR __fnOPTOUTLPDWORDOPTOUTLPDWORD_;
+  ULONG_PTR __fnOUTDWORDINDWORD;
+  ULONG_PTR __fnOUTLPRECT;
+  ULONG_PTR __fnOUTSTRING;
+  ULONG_PTR __fnPOPTINLPUINT3;
+  ULONG_PTR __fnPOUTLPINT2;
+  ULONG_PTR __fnSENTDDEMSG;
+  ULONG_PTR __fnINOUTSTYLECHANGE;
+  ULONG_PTR __fnHkINDWORD;
+  ULONG_PTR __fnHkINLPCBTACTIVATESTRUCT;
+  ULONG_PTR __fnHkINLPCBTCREATESTRUCT;
+  ULONG_PTR __fnHkINLPDEBUGHOOKSTRUCT;
+  ULONG_PTR __fnHkINLPMOUSEHOOKSTRUCTEX;
+  ULONG_PTR __fnHkINLPKBDLLHOOKSTRUCT;
+  ULONG_PTR __fnHkINLPMSLLHOOKSTRUCT;
+  ULONG_PTR __fnHkINLPMSG;
+  ULONG_PTR __fnHkINLPRECT;
+  ULONG_PTR __fnHkOPTINLPEVENTMSG;
+  ULONG_PTR __xxxClientCallDelegateThread;
+  ULONG_PTR __ClientCallDummyCallback;
+  ULONG_PTR __fnKEYBOARDCORRECTIONCALLOUT;
+  ULONG_PTR __fnOUTLPCOMBOBOXINFO;
+  ULONG_PTR __fnINLPCOMPAREITEMSTRUCT2;
+  ULONG_PTR __xxxClientCallDevCallbackCapture;
+  ULONG_PTR __xxxClientCallDitThread;
+  ULONG_PTR __xxxClientEnableMMCSS;
+  ULONG_PTR __xxxClientUpdateDpi;
+  ULONG_PTR __xxxClientExpandStringW;
+  ULONG_PTR __ClientCopyDDEIn1;
+  ULONG_PTR __ClientCopyDDEIn2;
+  ULONG_PTR __ClientCopyDDEOut1;
+  ULONG_PTR __ClientCopyDDEOut2;
+  ULONG_PTR __ClientCopyImage;
+  ULONG_PTR __ClientEventCallback;
+  ULONG_PTR __ClientFindMnemChar;
+  ULONG_PTR __ClientFreeDDEHandle;
+  ULONG_PTR __ClientFreeLibrary;
+  ULONG_PTR __ClientGetCharsetInfo;
+  ULONG_PTR __ClientGetDDEFlags;
+  ULONG_PTR __ClientGetDDEHookData;
+  ULONG_PTR __ClientGetListboxString;
+  ULONG_PTR __ClientGetMessageMPH;
+  ULONG_PTR __ClientLoadImage;
+  ULONG_PTR __ClientLoadLibrary;
+  ULONG_PTR __ClientLoadMenu;
+  ULONG_PTR __ClientLoadLocalT1Fonts;
+  ULONG_PTR __ClientPSMTextOut;
+  ULONG_PTR __ClientLpkDrawTextEx;
+  ULONG_PTR __ClientExtTextOutW;
+  ULONG_PTR __ClientGetTextExtentPointW;
+  ULONG_PTR __ClientCharToWchar;
+  ULONG_PTR __ClientAddFontResourceW;
+  ULONG_PTR __ClientThreadSetup;
+  ULONG_PTR __ClientDeliverUserApc;
+  ULONG_PTR __ClientNoMemoryPopup;
+  ULONG_PTR __ClientMonitorEnumProc;
+  ULONG_PTR __ClientCallWinEventProc;
+  ULONG_PTR __ClientWaitMessageExMPH;
+  ULONG_PTR __ClientWOWGetProcModule;
+  ULONG_PTR __ClientWOWTask16SchedNotify;
+  ULONG_PTR __ClientImmLoadLayout;
+  ULONG_PTR __ClientImmProcessKey;
+  ULONG_PTR __fnIMECONTROL;
+  ULONG_PTR __fnINWPARAMDBCSCHAR;
+  ULONG_PTR __fnGETTEXTLENGTHS2;
+  ULONG_PTR __fnINLPKDRAWSWITCHWND;
+  ULONG_PTR __ClientLoadStringW;
+  ULONG_PTR __ClientLoadOLE;
+  ULONG_PTR __ClientRegisterDragDrop;
+  ULONG_PTR __ClientRevokeDragDrop;
+  ULONG_PTR __fnINOUTMENUGETOBJECT;
+  ULONG_PTR __ClientPrinterThunk;
+  ULONG_PTR __fnOUTLPCOMBOBOXINFO2;
+  ULONG_PTR __fnOUTLPSCROLLBARINFO;
+  ULONG_PTR __fnINLPUAHDRAWMENU2;
+  ULONG_PTR __fnINLPUAHDRAWMENUITEM;
+  ULONG_PTR __fnINLPUAHDRAWMENU3;
+  ULONG_PTR __fnINOUTLPUAHMEASUREMENUITEM;
+  ULONG_PTR __fnINLPUAHDRAWMENU4;
+  ULONG_PTR __fnOUTLPTITLEBARINFOEX;
+  ULONG_PTR __fnTOUCH;
+  ULONG_PTR __fnGESTURE;
+  ULONG_PTR __fnPOPTINLPUINT4;
+  ULONG_PTR __fnPOPTINLPUINT5;
+  ULONG_PTR __xxxClientCallDefaultInputHandler;
+  ULONG_PTR __fnEMPTY;
+  ULONG_PTR __ClientRimDevCallback;
+  ULONG_PTR __xxxClientCallMinTouchHitTestingCallback;
+  ULONG_PTR __ClientCallLocalMouseHooks;
+  ULONG_PTR __xxxClientBroadcastThemeChange;
+  ULONG_PTR __xxxClientCallDevCallbackSimple;
+  ULONG_PTR __xxxClientAllocWindowClassExtraBytes;
+  ULONG_PTR __xxxClientFreeWindowClassExtraBytes;
+  ULONG_PTR __fnGETWINDOWDATA;
+  ULONG_PTR __fnINOUTSTYLECHANGE2;
+  ULONG_PTR __fnHkINLPMOUSEHOOKSTRUCTEX2;
+} KERNELCALLBACKTABLE;
+```
+Command in WinDbg to display the struct.
+```
+0:006> dps 0x00007ffe24d01070
+00007ffe`24d01070  00007ffe`24c92710 USER32!_fnCOPYDATA
+00007ffe`24d01078  00007ffe`24cf9a00 USER32!_fnCOPYGLOBALDATA
+00007ffe`24d01080  00007ffe`24c90b90 USER32!_fnDWORD
+00007ffe`24d01088  00007ffe`24c969f0 USER32!_fnNCDESTROY
+00007ffe`24d01090  00007ffe`24c9da60 USER32!_fnDWORDOPTINLPMSG
+00007ffe`24d01098  00007ffe`24cfa230 USER32!_fnINOUTDRAG
+00007ffe`24d010a0  00007ffe`24c97f20 USER32!_fnGETTEXTLENGTHS
+00007ffe`24d010a8  00007ffe`24cf9ed0 USER32!_fnINCNTOUTSTRING
+00007ffe`24d010b0  00007ffe`24cf9f90 USER32!_fnINCNTOUTSTRINGNULL
+00007ffe`24d010b8  00007ffe`24c99690 USER32!_fnINLPCOMPAREITEMSTRUCT
+00007ffe`24d010c0  00007ffe`24c92b70 USER32!__fnINLPCREATESTRUCT
+00007ffe`24d010c8  00007ffe`24cfa050 USER32!_fnINLPDELETEITEMSTRUCT
+00007ffe`24d010d0  00007ffe`24c9fdf0 USER32!__fnINLPDRAWITEMSTRUCT
+00007ffe`24d010d8  00007ffe`24cfa0b0 USER32!_fnINLPHELPINFOSTRUCT
+00007ffe`24d010e0  00007ffe`24cfa0b0 USER32!_fnINLPHELPINFOSTRUCT
+00007ffe`24d010e8  00007ffe`24cfa1b0 USER32!_fnINLPMDICREATESTRUCT
+```
+It's been abused by malwares and threat actors like FinSpy and Lazarus group using a using a technique called Process Injection via KernelCallbackTable **[MITRE - T1574.013](https://attack.mitre.org/techniques/T1574/013/)**
+
+# Walking the PEB
+In this demonstration, we will fetch the base address of the NTDLL file residing inside LDR data structure in PEB. Process will be notepad.exe
+
+
 
 
 
