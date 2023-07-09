@@ -308,12 +308,51 @@ Command in WinDbg to display the struct.
 00007ffe`24d010e0  00007ffe`24cfa0b0 USER32!_fnINLPHELPINFOSTRUCT
 00007ffe`24d010e8  00007ffe`24cfa1b0 USER32!_fnINLPMDICREATESTRUCT
 ```
-It's been abused by malwares and threat actors like FinSpy and Lazarus group using a using a technique called Process Injection via KernelCallbackTable **[MITRE - T1574.013](https://attack.mitre.org/techniques/T1574/013/)**
+It's been abused by malwares and threat actors like FinSpy and Lazarus group using a using a technique called Process Injection via KernelCallbackTable **[MITRE - T1574.013](https://attack.mitre.org/techniques/T1574/013/)**.
 
 # Walking the PEB
-In this demonstration, we will fetch the base address of the NTDLL file residing inside LDR data structure in PEB. Process will be notepad.exe  
+In this demonstration, we will fetch the base address of the NTDLL file residing inside LDR data structure in PEB. Process will be notepad.exe. In order to underand more in details, I've explained it my previous part **PEB - Part1** LDR section **[here](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%201.md#ldr)**.
 ![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/fb333e72-5a9c-4504-9f14-cb143a635385)\
-The LDr structure is at 
+The LDR structure is at the offset **0x18** which is for 64-bit architecture. Here is the structure of PEB, you'll see the following.
+```Cpp
+typedef struct _PEB {
+  BYTE                          Reserved1[2];
+  BYTE                          BeingDebugged;
+  BYTE                          Reserved2[1];
+  PVOID                         Reserved3[2];
+  PPEB_LDR_DATA                 Ldr;
+  // ...
+} PEB, *PPEB;
+```
+The first three entries ``Reserved1``, ``BeingDebugged`` and ``Reserved2`` take up 4 bytes on x86 and x64. After that, the offset calculation changes between 32-bit and 64-bit code.
+In 32-bit code, pointers are 4-byte aligned. Thus, there is no padding between Reserved2 and Reserved3. With Reserved3's size being 8 bytes (2 4-byte pointers), the offset of Ldr evaluates to **2 * 1 + 1 + 1 * 1 + 0 + 2 * 4 (i.e. 12 or 0x0C)**.
+In 64-bit code there are 2 differences: pointers are 8 bytes in size, and 8-byte aligned. The latter introduces padding between Reserved2 and Reserved3. The offset of Ldr thus evaluates to **2 * 1 + 1 + 1 * 1 + 4 + 2 * 8 (i.e. 24 or 0x18)**.
+Better look at the table below
+
+| Field | Offset(x86) | Offset(x64) |
+| ------ | ---------- | ---------- |
+| Reserved1 | 0 -> +2 | 0 -> +2 |
+| BeingDebugged | 2 -> +1 | 2 -> +1 |
+| Reserved2 | 3 -> +1 | 3 -> +1+4(padding) |
+| Reserved3 | 4 -> +(2*4=8) | 8 -> +(2*8=16)  |
+| Ldr | **12(0x0C)** | **24(0x18)** |
+
+The next value of the address is added in each column to understand the offset flow.
+
+Now navigating inside LDR structure.
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/e3cc0855-30c3-4477-8068-7fd1d0b73b68)\
+It has three important modules that are most important. If we take a look at anyone of them, we can see that it's(all three) a doubly-link with Flink(Forward) and Blink(Backward) like a standard doubly-linked list. If we navigate to FLINK address.
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/8a5a5f43-f801-4aed-8b7e-304d6c4190e6)\
+We can see the executable name and it's full path. Now checking the ``InInitializationmodulelist``  the link list.
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/68a85d0e-9cf9-4af6-a615-ee2195047e5c)\
+We got memory read error. Because it is a doubly link list we have to minus 20h cause the InInitializeOrderLinks is at offset 20. More like going 20 steps back to ``InLoadOrderLinks`` to get the base address of the NTDLL.
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/4fd22437-dad9-4278-b3b9-f3742c3d70fc)\
+Here we can see the base address of the NTDLL file. We can keep going backwards in link list to retrieve more DLL's address. In next section, we will write a code to do it for us.
+
+
+
+
+
 
 
 
