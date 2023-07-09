@@ -311,7 +311,10 @@ Command in WinDbg to display the struct.
 It's been abused by malwares and threat actors like FinSpy and Lazarus group using a using a technique called Process Injection via KernelCallbackTable **[MITRE - T1574.013](https://attack.mitre.org/techniques/T1574/013/)**
 
 # Walking the PEB
-In this demonstration, we will fetch the base address of the NTDLL file residing inside LDR data structure in PEB. Process will be notepad.exe
+In this demonstration, we will fetch the base address of the NTDLL file residing inside LDR data structure in PEB. Process will be notepad.exe  
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/fb333e72-5a9c-4504-9f14-cb143a635385)\
+The LDr structure is at 
+
 
 
 
