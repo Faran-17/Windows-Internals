@@ -8,6 +8,7 @@ If you want to read the previous part click **[here](https://github.com/Faran-17
 2. **[FastPebLock]()**
 3. **[KernelCallbackTable]()**
 4. **[Walking the PEB]()**
+5. **[Walking the PEB with C++]()**
 
 You can open any process for this, but I'm selecting **notepad.exe**
 
@@ -349,17 +350,32 @@ We got memory read error. Because it is a doubly link list we have to minus 20h 
 ![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/4fd22437-dad9-4278-b3b9-f3742c3d70fc)\
 Here we can see the base address of the NTDLL file. We can keep going backwards in link list to retrieve more DLL's address. In next section, we will write a code to do it for us.
 
+# Walking the PEB with C++
+Instead of manually doing all the offset calculation, we can write a C++ code that will do the heavy work for us. In this case, we will get the base address of all the DLL's base addresses. Before we move forward, we will take a visual representation of the whole PEB LDR structure representing with a diagram.
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/b89024df-c7b0-4182-8ced-bc2d77af8c7c)\
 
+Now moving towards write the code. You can find the whole code **[here]()**.
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/95d7fa40-6630-412c-ba52-97ebf89172b8)\
+Including all the necessary header files. Now rather than using the regular PEB structure as per MSDN **[here]([https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-peb](https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-peb_ldr_data)https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-peb_ldr_data)** and LDR struture we can refined it's strucutre for our specific use (reference from **[here](http://sandsprite.com/CodeStuff/Understanding_the_Peb_Loader_Data_List.html)**).
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/e73d373f-e914-4092-96de-fd6fc3de17cf)\
+Continuing on to the main section.
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/10a52a39-8511-4bd6-aa6b-e6b8995b37ff)\
+Here is what we're doing.
+1. Fetching the PEB address, using ``__readgsqword( 0x60 )`` for 64-bit architecture.
+2. Fetching PEB_LDR_DATA Structure Address from the PEB.
+3. Fetching the ``InLoadOrderModuleList``.
+4. Then parsing it to the LDR_DATA_TABLE_ENTRY structure.
 
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/96358357-84bf-494b-aaf6-e3eb45571e39)\
+In next step,
+1. Using while to check if the DLLBase address is not 0.
+2. Fetching the DllBase address from LDR Table entry.
+3. Fetching the BaseDLLName address from LDR Table entry.
+4. Printing the details.
+5. Loading the next DLL address.
 
+If we compile and run the code.
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/014dc758-4806-4b7d-84c8-976c72c19273)\
+We can see it successfully loaded the name and address of the executables and DLLs.
 
-
-
-
-
-
-
-
-
-
-
+That is all in this blog, hope you guys enojyed reading it!!😄
