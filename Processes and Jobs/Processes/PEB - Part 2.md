@@ -9,7 +9,7 @@ If you want to read the previous part click **[here](https://github.com/Faran-17
 3. **[KernelCallbackTable](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%202.md#kernelcallbacktable)**
 4. **[Walking the PEB](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%202.md#kernelcallbacktable)**
 5. **[Walking the PEB with C++](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%202.md#walking-the-peb-with-c)**
-6. **[Resources]()**
+6. **[Resources](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%202.md#resources)**
 
 You can open any process for this, but I'm selecting **notepad.exe**
 
@@ -384,4 +384,4 @@ That is all in this blog, hope you guys enojyed reading it!!😄
 # Resources
 1. **[https://www.youtube.com/watch?v=kOTb0Nm3_ks](https://www.youtube.com/watch?v=kOTb0Nm3_ks)**.
 2. **[https://www.apriorit.com/dev-blog/367-anti-reverse-engineering-protection-techniques-to-use-before-releasing-software](https://www.apriorit.com/dev-blog/367-anti-reverse-engineering-protection-techniques-to-use-before-releasing-software)**.
-3. **[https://www.ired.team/miscellaneous-reversing-forensics/windows-kernel-internals/exploring-process-environment-block](https://www.ired.team/miscellaneous-reversing-forensics/windows-kernel-internals/exploring-process-environment-block]**.
+3. **[https://www.ired.team/miscellaneous-reversing-forensics/windows-kernel-internals/exploring-process-environment-block](https://www.ired.team/miscellaneous-reversing-forensics/windows-kernel-internals/exploring-process-environment-block)**.
