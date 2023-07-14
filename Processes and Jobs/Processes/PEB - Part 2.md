@@ -7,7 +7,7 @@ If you want to read the previous part click **[here](https://github.com/Faran-17
 1. **[ProcessHeap](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%202.md#processheap)**
 2. **[FastPebLock](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%202.md#fastpeblock)**
 3. **[KernelCallbackTable](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%202.md#kernelcallbacktable)**
-4. **[Walking the PEB](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%202.md#kernelcallbacktable)**
+4. **[Walking the PEB](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%202.md#walking-the-peb)**
 5. **[Walking the PEB with C++](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%202.md#walking-the-peb-with-c)**
 6. **[Resources](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%202.md#resources)**
 
@@ -353,7 +353,7 @@ Here we can see the base address of the NTDLL file. We can keep going backwards 
 
 # Walking the PEB with C++
 Instead of manually doing all the offset calculation, we can write a C++ code that will do the heavy work for us. In this case, we will get the base address of all the DLL's base addresses. Before we move forward, we will take a visual representation of the whole PEB LDR structure representing with a diagram.
-![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/b89024df-c7b0-4182-8ced-bc2d77af8c7c)\
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/5d5be64a-9b53-41e7-93ec-a78a5b24ef4f)
 
 Now moving towards write the code. You can find the whole code **[here](https://github.com/Faran-17/Windows-Internals/blob/main/codes/Processes%20and%20Jobs/PEB_walker.cpp)**.\
 ![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/95d7fa40-6630-412c-ba52-97ebf89172b8)\
