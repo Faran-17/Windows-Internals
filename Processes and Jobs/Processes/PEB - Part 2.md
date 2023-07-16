@@ -347,7 +347,7 @@ It has three important modules that are most important. If we take a look at any
 ![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/8a5a5f43-f801-4aed-8b7e-304d6c4190e6)\
 We can see the executable name and it's full path. Now checking the ``InInitializationmodulelist``  the link list.
 ![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/68a85d0e-9cf9-4af6-a615-ee2195047e5c)\
-We got memory read error. Because it is a doubly link list we have to minus 20h cause the InLoadOrderLinks is at offset 20. More like going 20 steps back to ``InLoadOrderLinks`` to get the base address of the NTDLL.
+We got memory read error. Because it is a doubly link list we have to minus 20h cause the InInitializeOrderLinks is at offset 20. More like going 20 steps back to ``InLoadOrderLinks`` to get the base address of the NTDLL.
 ![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/4fd22437-dad9-4278-b3b9-f3742c3d70fc)\
 Here we can see the base address of the NTDLL file. We can keep going backwards in link list to retrieve more DLL's address. In next section, we will write a code to do it for us.
 
