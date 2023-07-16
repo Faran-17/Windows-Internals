@@ -652,6 +652,7 @@ You can see the full path of the cmd.exe
 
 This is the end of the part 1 of understanding the internals of PEB. In the next part, we will take a look at more fields inside PEB. Stay tuned :blush:
 
+Read the part-2 **[here](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/PEB%20-%20Part%202.md)**
 
 # References 
 
@@ -660,5 +661,3 @@ This is the end of the part 1 of understanding the internals of PEB. In the next
 3. **[https://papers.vx-underground.org/papers/Malware%20Defense/Malware%20Analysis%202018/2018-02-26%20-%20Anatomy%20of%20the%20Process%20Environment%20Block%20(PEB)%20(Windows%20Internals).pdf](https://papers.vx-underground.org/papers/Malware%20Defense/Malware%20Analysis%202018/2018-02-26%20-%20Anatomy%20of%20the%20Process%20Environment%20Block%20(PEB)%20(Windows%20Internals).pdf)**
 4. **[https://dosxuz.gitlab.io/post/perunsfart/](https://dosxuz.gitlab.io/post/perunsfart/)**
 5. **[https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/pebteb/peb/index.htm](https://www.geoffchappell.com/studies/windows/km/ntoskrnl/inc/api/pebteb/peb/index.htm)**
-
-
