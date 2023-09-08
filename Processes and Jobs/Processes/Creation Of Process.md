@@ -82,7 +82,116 @@ Just like a malware, let's first take a look at inside the methodology of our co
 
 ![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/3726d542-596e-456b-be43-42157db4951f)  
 
-Here is whole graphical flow of the whole process(no puns again)
+Here is whole graphical flow of the whole process(no puns again)  
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/898ce84a-6f51-45c6-9ba4-4cc3afc5f159)  
+
+As we can see, the **main()** function is shown in the analysis along with the variables and structures decalred.
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/ad38b8af-a6e6-4666-8cc5-c04d213eaefb)  
+
+Scroll down and we see the whole code in the form of assembly, here its what happenning -
+* The value of lpApplicationName is loaded into rcx,
+* The value of lpThreadAttributes is set to NULL
+* The value of lpProcessAttributes is set to NULL
+* The value of lpCommandLine is set to NULL
+* The pointer to lpProcessInformation is set from the variable defined
+* The pointer to lpStartupInfo is set from the variable defined
+* Other parameters values are set accordingly.
+* Then the CreateProcess API is called along with it’s variables.
+
+The CreateProcess API has return type of BOOL. The return value will be non-zero if the API runs successfully or else the value will be 0.
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/041b603e-f040-4388-ab7d-0c6296290415)  
+
+The JE(Jump If Equal) will do the comparison and will redirect the execution. If the API fails.  
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/a29f207f-fd3b-40cb-b2a0-abf066459e40)  
+
+The **[GetLastError](https://learn.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror)** is called to handle the error. And if the API is successful.  
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/021481ac-be19-4a17-a2a5-ec782ed3bc28)  
+
+The process is spawned and the **[CloseHandle](https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle)** API is called to close the process completely.
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/1370a892-b808-4441-8830-4b3b03f0aea8)  
+
+And then the return function is called to close the program. Although the whole flow is understanable, still we can't see how the switch from user mode to kernel mode happens. To know this, we'll be doing dynamic analysis of the executable
+
+# X64Dbg Analysis
+Open the exectuable inside x64Dbg and press F9 to start the execution. To make things easy, I've already setup breakpoints at important places to make is more understandable.
+
+Before we move on, here is the whole diagram of the flow of creating a process.
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/eba6b471-572b-445b-bf92-0ced7d844a22)  
+
+Make sure to keep this flow in your mind for better understanding. Open the exe inside the debugger and press F9 to start the execution.
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/1aea77c1-7eb7-4bd1-9a78-e72c47bc5950)  
+
+Pressing F9 to move to the next breakpoint. 
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/41281d05-6696-47cd-acc3-fefcc02f035f)  
+
+An execution call is mode to the executable binary i.e **create-process.exe**. Now stepping into this execution call and pressing F9 to move to the next breakpoint.  
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/c3cec5bc-b66c-4b83-861c-db2693f172a0)  
+
+Moving inside we will see the CreatePreocessW API call, this is where are the parameters are set. Then step into it as well. After setting the parameters we step into the moment before it get’s executed.  
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/61ba8bba-9a08-4577-b1e8-cfd103ac9101)  
+
+Then we step into the it to see what happens after the **CreateProcessW** is called.  
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/67eaf446-edff-45c5-b144-4e78a95cd3b6)  
+
+We can see that the **[CreateProcessInternalW](https://doxygen.reactos.org/d9/dd7/dll_2win32_2kernel32_2client_2proc_8c.html#a13a0f94b43874ed5a678909bc39cc1ab)** is called from KernelBase.dll which in simple words gets functionality from kernel32.dll and advapi32.dll. Now we step inside CreateProcessInternalW.
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/8adecf16-f317-4880-a074-e62e5face271)
+
+It is making call to NtCreateUserProcess inside NTDLL. Here is the structure of the API
+```CPP
+NTSTATUS
+NTAPI
+NtCreateUserProcess(
+    _Out_ PHANDLE ProcessHandle,
+    _Out_ PHANDLE ThreadHandle,
+    _In_ ACCESS_MASK ProcessDesiredAccess,
+    _In_ ACCESS_MASK ThreadDesiredAccess,
+    _In_opt_ POBJECT_ATTRIBUTES ProcessObjectAttributes,
+    _In_opt_ POBJECT_ATTRIBUTES ThreadObjectAttributes,
+    _In_ ULONG ProcessFlags,
+    _In_ ULONG ThreadFlags,
+    _In_ PRTL_USER_PROCESS_PARAMETERS ProcessParameters,
+    _Inout_ PPS_CREATE_INFO CreateInfo,
+    _In_ PPS_ATTRIBUTE_LIST AttributeList
+);
+```
+Stepping inside the API call.
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/84654a36-8566-4e16-a0ca-e63d8ab67d61)  
+
+We can see that it is making a syscall to NtCreateUserProcess which resides inside kernel and that actually start our process. If we press F9 to resume the execution, notepad.exe will be spawned.  
+
+![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/ea71ca75-a070-4698-bcf4-19e1982c3e61)  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
