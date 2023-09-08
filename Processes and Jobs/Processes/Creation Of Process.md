@@ -175,11 +175,14 @@ We can see that it is making a syscall to NtCreateUserProcess which resides insi
 
 ![image](https://github.com/Faran-17/Windows-Internals/assets/59355783/ea71ca75-a070-4698-bcf4-19e1982c3e61)  
 
+We can visualize this whole process creation in a small video.  
 
+https://github.com/Faran-17/Windows-Internals/assets/59355783/fc21c971-ade9-4505-8628-4a2298cd0331
 
+# Creating Process Via NTAPIs
+In this section, we will take a look at how we can create a process directly with the Native API **NtCreateUserProcess**. Although this is beyond my skillset, fortunately **[@CaptMeelo](https://twitter.com/CaptMeelo)** created a awesome blog post on how to do it exactly. In this section, I'll just try to explain the method in an easy way. In order to know more about this topics you can read it on the author's website **([HERE](https://captmeelo.com/redteam/maldev/2022/05/10/ntcreateuserprocess.html))**. All credits to the creator for this amazing write-up
 
-
-
+As we saw the **NtCreateUserProcess** API is where the transition from User mode to Kernel mode happens.
 
 
 
