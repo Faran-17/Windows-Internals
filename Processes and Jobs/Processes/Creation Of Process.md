@@ -440,8 +440,13 @@ Compiling and running the code will pop-up the calc.exe
 # Conclusion
 In this, post we've seen how a normal process is created inside a Windows environment. We wrote a C++ code that spawns a process and debugged it inside a debugger to view it's inner working. Also we've taken a look at the POC that creates a process via NTAPIs. All the reference and resources are mentioned below
 
-# References
+Thank you for reading😄
 
+# References
+1. **https://doxygen.reactos.org/**
+2. **https://captmeelo.com/redteam/maldev/2022/05/10/ntcreateuserprocess.html**
+3. **https://github.com/capt-meelo/NtCreateUserProcess**
+4. **https://github.com/winsiderss/systeminformer/blob/master/phnt/include/ntpsapi.h**
 
 
 
