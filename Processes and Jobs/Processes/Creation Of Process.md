@@ -10,7 +10,7 @@ Note - All the references, credits and codes will mentioned in this blog.
 4. **[Process Creatia Via NTAPIs](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/Creation%20Of%20Process.md#creating-process-via-ntapis)**
 
 # Process Creation Via C++
-I wrote a blog a while go on the overview of how a process is created inside a Windows environment, you can read it **[here](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/Overview%20of%20process%20creation.md)**. In there I tried to explain the general overview of the whole process of creation of process(no puns intended). Let's take a deep dive. Below here is a simple C++ code that will spawn **notepad.exe** process. (The code is stored here)
+I wrote a blog a while go on the overview of how a process is created inside a Windows environment, you can read it **[here](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/Overview%20of%20process%20creation.md)**. In there I tried to explain the general overview of the whole process of creation of process(no puns intended). Let's take a deep dive. Below here is a simple C++ code that will spawn **notepad.exe** process. (The code is stored **[here](https://github.com/Faran-17/Windows-Internals/blob/main/codes/Processes%20and%20Jobs/Create_Process.cpp)**)
 ```CPP
 #include <windows.h>
 #include <iostream>
