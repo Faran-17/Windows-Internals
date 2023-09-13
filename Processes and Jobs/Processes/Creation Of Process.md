@@ -4,10 +4,10 @@ In this blog, we will take a deep dive inside on how a normal process is created
 Note - All the references, credits and codes will mentioned in this blog.
 
 # Index
-1. Process Creation Via C++
-2. Static Analysis
-3. X64dbg Analysis
-4. Process Creatia Via NTAPIs
+1. **[Process Creation Via C++](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/Creation%20Of%20Process.md#process-creation-via-c)**
+2. **[Static Analysis](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/Creation%20Of%20Process.md#static-analysis)**
+3. **[X64dbg Analysis](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/Creation%20Of%20Process.md#x64dbg-analysis)**
+4. **[Process Creatia Via NTAPIs](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/Creation%20Of%20Process.md#creating-process-via-ntapis)**
 
 # Process Creation Via C++
 I wrote a blog a while go on the overview of how a process is created inside a Windows environment, you can read it **[here](https://github.com/Faran-17/Windows-Internals/blob/main/Processes%20and%20Jobs/Processes/Overview%20of%20process%20creation.md)**. In there I tried to explain the general overview of the whole process of creation of process(no puns intended). Let's take a deep dive. Below here is a simple C++ code that will spawn **notepad.exe** process. (The code is stored here)
